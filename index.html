@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FC SEOUL TRAINING LOG</title>
+
+<!-- 홈 화면 추가(PWA) 지원 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FC SEOUL">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a1a">
+<link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/f/ff/FC_Seoul_logotype.png">
+<link rel="shortcut icon" href="https://upload.wikimedia.org/wikipedia/commons/f/ff/FC_Seoul_logotype.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --red:#E30613; --black:#1a1a1a; --gold:#C5A059; --bg:#334155;
+    --salmon:#F1948A; --salmon2:#F5B7B1;
+  }
+  *{box-sizing:border-box; -webkit-print-color-adjust:exact;}
+  body{margin:0; font-family:'Apple SD Gothic Neo', sans-serif; background:var(--bg); min-height:100vh;}
+
+  /* ---------- 로그인 화면 ---------- */
+  #loginScreen{ min-height:100vh; display:flex; align-items:center; justify-content:center; }
+  .login-card{ background:white; width:380px; border-radius:10px; overflow:hidden; box-shadow:0 15px 50px rgba(0,0,0,0.5); }
+  .login-head{ background:var(--black); border-top:6px solid var(--red); color:white; padding:22px; text-align:center; }
+  .login-head h1{ margin:0; font-size:20px; font-weight:900; letter-spacing:-0.5px; }
+  .login-head p{ margin:4px 0 0; font-size:11px; color:#94a3b8; }
+  .login-body{ padding:22px; }
+  .login-body label{ font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:4px; }
+  .login-body input, .login-body select{ width:100%; padding:9px; margin-bottom:12px; border:1px solid #ddd; border-radius:5px; font-size:13px; }
+  .btn{ display:block; width:100%; padding:10px; border:none; border-radius:5px; font-weight:bold; font-size:13px; cursor:pointer; margin-bottom:8px; }
+  .btn-red{ background:var(--red); color:white; }
+  .btn-black{ background:var(--black); color:white; }
+  .btn-outline{ background:white; color:var(--black); border:1px solid #cbd5e1; }
+  .login-toggle{ text-align:center; font-size:12px; color:#0284c7; cursor:pointer; margin-top:4px; }
+  .login-error{ color:var(--red); font-size:11.5px; margin:-4px 0 10px; min-height:14px; font-weight:bold; }
+  .backend-box{ background:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; padding:8px; margin-bottom:14px; }
+  .backend-box small{ color:#64748b; font-size:10px; }
+
+  /* ---------- 앱 화면 ---------- */
+  #appScreen{ display:none; }
+  .topbar{ background:var(--black); color:white; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:4px solid var(--red); position:sticky; top:0; z-index:50;}
+  .topbar .brand{ font-weight:900; letter-spacing:-0.5px; }
+  .topbar .brand span{ color:var(--red); }
+  .topbar .userinfo{ font-size:12px; color:#cbd5e1; display:flex; gap:10px; align-items:center; }
+  .topbar button{ background:#334155; color:white; border:none; padding:6px 12px; border-radius:4px; font-size:11.5px; cursor:pointer; }
+
+  .layout{ display:flex; min-height:calc(100vh - 53px); }
+  .sidebar{ width:300px; background:white; padding:16px; flex-shrink:0; border-right:1px solid #cbd5e1; overflow-y:auto; }
+  .sidebar h3{ font-size:12px; color:var(--red); border-bottom:2px solid var(--gold); display:inline-block; padding-bottom:3px; margin:0 0 10px; }
+  .sidebar select, .sidebar input{ width:100%; padding:7px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; font-size:12.5px; }
+  .archive-item{ padding:8px 10px; border:1px solid #e2e8f0; border-radius:5px; margin-bottom:6px; font-size:11.5px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+  .archive-item:hover{ background:#f8fafc; }
+  .archive-item.active{ border-color:var(--red); background:#fff5f5; }
+  .main{ flex:1; padding:20px; overflow-x:auto; }
+
+  .perm-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #eee; font-size:12px; }
+  .perm-row button{ font-size:10.5px; padding:4px 8px; border-radius:4px; border:none; cursor:pointer; color:white; }
+
+  /* ---------- 일지 카드 (내보내기 대상) ---------- */
+  #journalCard{ background:white; width:1050px; max-width:100%; margin:0 auto; padding:30px 35px; border-top:15px solid var(--red); box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+  .j-title{ text-align:center; font-size:20px; font-weight:900; color:var(--black); margin-bottom:14px; }
+  .j-meta{ text-align:right; font-size:11px; color:#64748b; margin-bottom:6px; }
+  table.j-table{ width:100%; border-collapse:collapse; }
+  table.j-table th{ background:var(--red); color:white; font-size:11.5px; padding:10px 6px; border:1px solid #c0050f; }
+  table.j-table td{ border:1px solid #cbd5e1; padding:5px; font-size:11px; vertical-align:middle; }
+  table.j-table td.goal-cell{ background:var(--salmon2); }
+  tr.goal-row td:first-child{ background:#f8fafc; font-weight:bold; text-align:center; color:var(--black); }
+  tr.score-row td:first-child{ background:#f1f5f9; font-weight:bold; text-align:center; }
+  tr.video-row td:first-child{ background:#f8fafc; font-weight:bold; text-align:center; }
+  .goal-cell textarea{ width:100%; border:none; background:transparent; resize:none; font-size:11px; font-family:inherit; min-height:38px; }
+  .goal-cell textarea:disabled{ color:#334155; }
+  .score-cell input{ width:100%; text-align:center; border:1px solid #ddd; border-radius:4px; padding:4px; font-weight:bold; }
+  .score-cell input:disabled{ border:none; background:transparent; color:#0369a1; font-size:13px; }
+  .tap-score-row{ display:flex; align-items:center; justify-content:center; gap:3px; flex-wrap:wrap; }
+  .tap-score-btn{ width:22px; height:22px; border-radius:50%; border:1px solid #cbd5e1; background:white; font-size:10px; font-weight:bold; color:#334155; cursor:pointer; padding:0; }
+  .tap-score-btn.active{ background:var(--red); border-color:var(--red); color:white; }
+  .tap-score-btn.half{ background:var(--gold); border-color:var(--gold); color:white; }
+  .tap-score-btn:disabled{ opacity:0.4; cursor:default; }
+  .tap-score-value{ font-size:11px; font-weight:900; color:#0369a1; margin-left:4px; min-width:22px; }
+  @media (max-width: 820px){
+    .tap-score-btn{ width:26px; height:26px; font-size:11px; }
+  }
+  .video-cell{ display:flex; flex-direction:column; gap:3px; }
+  .video-cell input[type=text]{ width:100%; font-size:9.5px; padding:3px; border:1px solid #ddd; border-radius:3px; }
+  .video-cell a{ font-size:10px; color:#0284c7; font-weight:bold; text-decoration:none; }
+  .video-cell .vfile-btn{ font-size:9px; padding:2px 4px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:3px; cursor:pointer; }
+
+  .legend-row{ display:flex; flex-wrap:wrap; gap:14px; margin-top:16px; justify-content:center; }
+  .legend-row div{ font-size:11px; display:flex; align-items:center; gap:5px; }
+  .legend-dot{ width:11px; height:11px; border-radius:50%; display:inline-block; }
+
+  .charts-row{ display:flex; justify-content:center; gap:60px; margin-top:20px; flex-wrap:wrap; }
+  .chart-box{ width:260px; text-align:center; }
+  .chart-box h4{ font-size:12px; color:var(--black); margin-bottom:6px; }
+
+  .actions-row{ display:flex; gap:8px; justify-content:center; margin:16px auto; max-width:1050px; }
+  .actions-row button{ padding:8px 16px; border:none; border-radius:5px; font-size:12px; font-weight:bold; cursor:pointer; color:white; }
+
+  @media print{
+    body *{ visibility:hidden; }
+    #journalCard, #journalCard *{ visibility:visible; }
+    #journalCard{ position:absolute; top:0; left:0; width:100%; box-shadow:none; border-top:15px solid var(--red); }
+  }
+
+  /* ---------- 모바일 반응형 ---------- */
+  @media (max-width: 820px){
+    .layout{ flex-direction:column; min-height:auto; }
+    .sidebar{ width:100%; border-right:none; border-bottom:4px solid var(--red); max-height:none; }
+    .main{ padding:12px; }
+    #journalCard{ width:100%; padding:16px 12px; }
+    .j-title{ font-size:16px; }
+    table.j-table{ font-size:9.5px; }
+    table.j-table th{ padding:6px 3px; font-size:9.5px; }
+    .goal-cell textarea{ min-height:30px; font-size:9.5px; }
+    .charts-row{ gap:20px; }
+    .chart-box{ width:140px; }
+    .login-card{ width:92vw; }
+    .topbar{ flex-wrap:wrap; gap:6px; padding:8px 12px; }
+    .topbar .userinfo{ flex-wrap:wrap; gap:6px; }
+    .actions-row{ flex-wrap:wrap; }
+    #dashboardCard{ padding:14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== 로그인 화면 ===================== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-head">
+      <h1>FC SEOUL <span style="color:var(--red)">TRAINING LOG</span></h1>
+      <p>선수 개인 훈련일지 (드리블 · 패스 · 터치 주기화)</p>
+    </div>
+    <div class="login-body">
+      <div class="backend-box" id="backendConfigBox">
+        <label style="margin-bottom:4px;">백엔드 URL (Apps Script 웹앱 주소)</label>
+        <input type="text" id="backendUrl" placeholder="https://script.google.com/macros/s/.../exec">
+        <small>* Code.gs 배포 후 나온 웹앱 URL을 붙여넣으세요. 브라우저에 저장되어 다음부턴 자동 입력됩니다.</small>
+      </div>
+
+      <div class="backend-box" id="googleConfigBox">
+        <label style="margin-bottom:4px;">구글 로그인용 Client ID (선택)</label>
+        <input type="text" id="googleClientId" placeholder="xxxxxxxx.apps.googleusercontent.com" onchange="waitForGoogleThenInit()">
+        <small>* 구글 클라우드 콘솔에서 만든 OAuth Client ID를 입력하면 구글 계정으로 로그인할 수 있어요. https로 호스팅된 주소에서만 동작합니다 (파일을 그냥 열면 작동 안 함).</small>
+        <div id="googleBtnContainer" style="margin-top:10px; display:flex; justify-content:center;"></div>
+        <div class="login-error" id="googleError"></div>
+      </div>
+
+      <div class="backend-box" id="kakaoConfigBox">
+        <label style="margin-bottom:4px;">카카오 JavaScript 키 (선택)</label>
+        <input type="text" id="kakaoJsKey" placeholder="카카오 개발자 센터에서 발급받은 JavaScript 키">
+        <small>* 카카오 로그인을 쓰려면 필요해요. https로 호스팅된 주소에서만 동작합니다.</small>
+      </div>
+
+      <div id="showConfigToggle" style="display:none; text-align:center; margin-bottom:10px;">
+        <span class="login-toggle" onclick="toggleConfigBoxes()">⚙ 서버 설정 보기/변경 (관리자용)</span>
+      </div>
+
+      <button class="btn" style="background:#FEE500; color:#191919;" onclick="startKakaoLogin()"><i class="fa fa-comment"></i> 카카오로 로그인</button>
+      <div class="login-error" id="kakaoError"></div>
+      <hr style="margin:14px 0; border:0; border-top:1px solid #eee;">
+
+      <div id="loginForm">
+        <label>아이디</label>
+        <input type="text" id="loginId" placeholder="아이디">
+        <label>비밀번호</label>
+        <input type="password" id="loginPw" placeholder="비밀번호">
+        <div class="login-error" id="loginError"></div>
+        <button class="btn btn-red" onclick="doLogin()">로그인</button>
+        <div class="login-toggle" onclick="toggleForm('register')">계정이 없으신가요? 회원가입</div>
+      </div>
+
+      <div id="registerForm" style="display:none;">
+        <label>아이디</label>
+        <input type="text" id="regId" placeholder="아이디">
+        <label>비밀번호</label>
+        <input type="password" id="regPw" placeholder="비밀번호">
+        <label>이름</label>
+        <input type="text" id="regName" placeholder="이름">
+        <label>역할</label>
+        <select id="regRole">
+          <option value="player">선수</option>
+          <option value="coach">지도자</option>
+        </select>
+        <label>프로필 사진 (선택)</label>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <img id="regPhotoPreview" src="" style="width:48px; height:48px; border-radius:50%; object-fit:cover; background:#f1f5f9; border:1px solid #cbd5e1; display:none;">
+          <input type="file" id="regPhoto" accept="image/*" onchange="handleRegPhoto(event)" style="flex:1;">
+        </div>
+        <div class="login-error" id="regError"></div>
+        <button class="btn btn-black" onclick="doRegister()">회원가입</button>
+        <div class="login-toggle" onclick="toggleForm('login')">이미 계정이 있으신가요? 로그인</div>
+      </div>
+
+      <div id="googleRegisterForm" style="display:none;">
+        <p style="font-size:12px; color:#64748b; margin-top:0;"><b id="googleRegName"></b>님, 구글 계정이 아직 연결되어 있지 않아요. 처음 한 번만 역할을 선택해주세요.</p>
+        <label>역할</label>
+        <select id="googleRegRole">
+          <option value="player">선수</option>
+          <option value="coach">지도자</option>
+        </select>
+        <div class="login-error" id="googleRegError"></div>
+        <button class="btn btn-red" onclick="finishGoogleRegister()">구글 계정으로 가입 완료</button>
+      </div>
+
+      <div id="kakaoRegisterForm" style="display:none;">
+        <p style="font-size:12px; color:#64748b; margin-top:0;">카카오 계정이 아직 연결되어 있지 않아요. 처음 한 번만 정보를 입력해주세요.</p>
+        <label>이름</label>
+        <input type="text" id="kakaoRegName">
+        <label>역할</label>
+        <select id="kakaoRegRole">
+          <option value="player">선수</option>
+          <option value="coach">지도자</option>
+        </select>
+        <div class="login-error" id="kakaoRegError"></div>
+        <button class="btn" style="background:#FEE500; color:#191919;" onclick="finishKakaoRegister()">카카오 계정으로 가입 완료</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 메인 앱 화면 ===================== -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="brand">FC SEOUL <span>TRAINING LOG</span></div>
+    <div class="userinfo">
+      <img id="userAvatar" src="" style="width:26px; height:26px; border-radius:50%; object-fit:cover; display:none; border:1px solid #475569;">
+      <span id="userLabel"></span>
+      <button onclick="exportExcel()"><i class="fa fa-file-excel"></i> 엑셀 내보내기</button>
+      <button onclick="logout()">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main" id="mainArea">
+      <div id="dashboardWrapper" style="display:none;">
+        <div id="dashboardCard" style="background:white; border-radius:8px; border-top:10px solid var(--red); padding:20px; max-width:1000px; margin:0 auto;"></div>
+      </div>
+      <div id="byTypeWrapper" style="display:none;">
+        <div id="byTypeCard" style="background:white; border-radius:8px; border-top:10px solid var(--gold); padding:20px; max-width:1000px; margin:0 auto;"></div>
+      </div>
+      <div id="journalWrapper" style="display:none;">
+        <div class="actions-row">
+          <button style="background:#0284c7" onclick="exportPNG()"><i class="fa fa-image"></i> PNG 저장</button>
+          <button style="background:var(--black)" onclick="window.print()"><i class="fa fa-print"></i> PDF 저장</button>
+          <button style="background:#16a34a" onclick="saveEntry()"><i class="fa fa-save"></i> 저장</button>
+        </div>
+        <div id="journalCard"></div>
+      </div>
+      <div id="emptyMsg" style="color:white; text-align:center; margin-top:60px; font-size:14px;">왼쪽에서 일지를 선택하거나 새로 작성해보세요.</div>
+    </div>
+  </div>
+
+  <!-- 성장 추이 모달 -->
+  <div id="growthModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:500; align-items:center; justify-content:center;">
+    <div style="background:white; width:600px; max-width:92vw; border-radius:8px; border-top:8px solid var(--red); padding:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="margin:0; color:var(--black);">주차별 성장 추이</h3>
+        <button onclick="closeGrowthChart()" style="border:none; background:none; font-size:18px; cursor:pointer;">&times;</button>
+      </div>
+      <canvas id="growthCanvas" height="260"></canvas>
+      <div id="growthEmpty" style="display:none; text-align:center; color:#94a3b8; font-size:12px; padding:20px;">아직 비교할 만한 저장된 일지가 부족해요 (2개 이상 필요).</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================== 데이터 정의 ===================== */
+const JournalTypes = {
+  dribble: { title: "드리블 주기화", categories: ["상황인지 + 속도변화 (소유)","볼소유를 위한 드리블 (소유)","도전적인 드리블 + 슈팅 (전진)","전진적인 드리블 + 득점 (전진)","2대2, 3대2 수비"] },
+  pass:    { title: "패스 주기화",   categories: ["상황인지 후 패스 연결","볼 소유를 위한 패스선택","공격적인 패스선택,움직임 (전진)","전진하기 위한 도전적인 패스,움직임(전진)","공수전환 시도 & 협력수비"] },
+  touch:   { title: "터치 주기화",   categories: ["목적이 있는 터치 (공간,수비위치) 넓이","상황인지 볼소유를 위한 (소유) 터치","터치의 방향성 (공격적) (전진)","득점을 위한 터치 (터치)","1대1,2대2 수비"] }
+};
+const DAYS = ["월","화","수","목","금","경기"];
+const PALETTE = ["#F4C430","#F2994A","#EB5B2F","#E12F2F","#8B1E1E"];
+
+/* =====================================================================
+ [관리자 전용 설정] 아래 두 값을 채워두면, 선수/지도자는 백엔드 URL이나
+ 카카오 키를 각자 입력할 필요 없이 바로 로그인 화면부터 쓸 수 있어요.
+ - DEFAULT_BACKEND_URL: Code.gs 배포 후 나온 웹앱 URL
+ - DEFAULT_GOOGLE_CLIENT_ID: 구글 로그인을 쓸 경우에만 채우면 됨 (안 쓰면 빈칸 유지)
+ - DEFAULT_KAKAO_JS_KEY: 카카오 로그인을 쓸 경우에만 채우면 됨 (안 쓰면 빈칸 유지)
+===================================================================== */
+const DEFAULT_BACKEND_URL = "";
+const DEFAULT_GOOGLE_CLIENT_ID = "";
+const DEFAULT_KAKAO_JS_KEY = "";
+
+function avg(arr){ if(!arr || !arr.length) return 0; const s = arr.reduce((a,b)=>a+(b||0),0); return Math.round((s/arr.length)*10)/10; }
+function getMonday(d){ const date = new Date(d); const day = date.getDay(); const diff = date.getDate() - day + (day===0 ? -6 : 1); const m = new Date(date.setDate(diff)); m.setHours(0,0,0,0); return m; }
+function toDateStr(d){ return d.toISOString().slice(0,10); }
+
+let currentUser = null;
+let regPhotoData = "";
+let playersInfo = {}; // 코치가 조회한 선수 목록 캐시 (id -> {name, photo})
+let currentType = "dribble";
+let currentEntry = null; // 현재 화면에 로드된 entry 객체
+let currentPlayerId = null; // 코치가 보고 있는 대상 선수
+let currentPlayerName = null;
+let growthChartObj = null;
+async function showGrowthChart(){
+  if(!currentPlayerId){ alert('먼저 선수를 선택해주세요.'); return; }
+  const res = await callBackend({ action:'getAllData', requesterId: currentUser.id });
+  if(!res.ok){ alert(res.error||'불러오기 실패'); return; }
+  const entries = res.entries
+    .filter(e => e.playerId === currentPlayerId && e.type === currentType && e.playerScores)
+    .sort((a,b) => new Date(a.weekStartDate) - new Date(b.weekStartDate));
+
+  document.getElementById('growthModal').style.display = 'flex';
+  if(entries.length < 2){
+    document.getElementById('growthEmpty').style.display = 'block';
+    document.getElementById('growthCanvas').style.display = 'none';
+    return;
+  }
+  document.getElementById('growthEmpty').style.display = 'none';
+  document.getElementById('growthCanvas').style.display = 'block';
+
+  const labels = entries.map(e => e.weekLabel || e.weekStartDate);
+  const playerAvgData = entries.map(e => avg(e.playerScores));
+  const coachAvgData = entries.map(e => avg(e.coachScores));
+
+  if(growthChartObj) growthChartObj.destroy();
+  growthChartObj = new Chart(document.getElementById('growthCanvas'), {
+    type: 'line',
+    data: { labels, datasets: [
+      { label:'선수 자가평가 평균', data: playerAvgData, borderColor:'#E30613', backgroundColor:'rgba(227,6,19,0.1)', tension:0.25 },
+      { label:'지도자 평가 평균', data: coachAvgData, borderColor:'#1a1a1a', backgroundColor:'rgba(26,26,26,0.06)', tension:0.25 }
+    ]},
+    options: { responsive:true, scales:{ y:{ min:0, max:5 } }, plugins:{ legend:{ position:'bottom' } } }
+  });
+}
+function closeGrowthChart(){ document.getElementById('growthModal').style.display = 'none'; }
+
+let playerChart = null, coachChart = null;
+
+/* ===================== 로그인/회원가입 ===================== */
+function toggleForm(which){
+  document.getElementById('loginForm').style.display = which==='login' ? 'block':'none';
+  document.getElementById('registerForm').style.display = which==='register' ? 'block':'none';
+}
+
+window.onload = function(){
+  // 관리자가 DEFAULT_* 값들을 채워뒀으면 그 값을 최우선으로 쓰고,
+  // 선수/지도자 화면에서는 설정칸 자체를 숨겨서 아무것도 입력할 필요가 없게 한다.
+  const savedUrl = DEFAULT_BACKEND_URL || localStorage.getItem('tj_backend_url');
+  if(savedUrl){
+    document.getElementById('backendUrl').value = savedUrl;
+    localStorage.setItem('tj_backend_url', savedUrl);
+  }
+  const savedGoogleId = DEFAULT_GOOGLE_CLIENT_ID || localStorage.getItem('tj_google_client_id');
+  if(savedGoogleId){
+    document.getElementById('googleClientId').value = savedGoogleId;
+    localStorage.setItem('tj_google_client_id', savedGoogleId);
+    waitForGoogleThenInit();
+  }
+  const savedKakaoKey = DEFAULT_KAKAO_JS_KEY || localStorage.getItem('tj_kakao_key');
+  if(savedKakaoKey){
+    document.getElementById('kakaoJsKey').value = savedKakaoKey;
+    localStorage.setItem('tj_kakao_key', savedKakaoKey);
+  }
+  if(DEFAULT_BACKEND_URL){
+    document.getElementById('backendConfigBox').style.display = 'none';
+    document.getElementById('googleConfigBox').style.display = DEFAULT_GOOGLE_CLIENT_ID ? 'none' : (savedGoogleId ? 'block' : 'none');
+    document.getElementById('kakaoConfigBox').style.display = DEFAULT_KAKAO_JS_KEY ? 'none' : 'block';
+    document.getElementById('showConfigToggle').style.display = 'block';
+  }
+  const savedUser = JSON.parse(localStorage.getItem('tj_user')||'null');
+  if(savedUser && savedUrl){ currentUser = savedUser; enterApp(); }
+};
+
+function toggleConfigBoxes(){
+  const box1 = document.getElementById('backendConfigBox');
+  const box2 = document.getElementById('googleConfigBox');
+  const box3 = document.getElementById('kakaoConfigBox');
+  const show = box1.style.display === 'none';
+  box1.style.display = show ? 'block' : 'none';
+  box2.style.display = show ? 'block' : 'none';
+  box3.style.display = show ? 'block' : 'none';
+}
+
+function getBackendUrl(){
+  const url = document.getElementById('backendUrl').value.trim();
+  if(url) localStorage.setItem('tj_backend_url', url);
+  return url;
+}
+
+function getKakaoJsKey(){
+  const key = document.getElementById('kakaoJsKey').value.trim();
+  if(key) localStorage.setItem('tj_kakao_key', key);
+  return key;
+}
+
+async function callBackend(payload, silent){
+  const url = getBackendUrl();
+  if(!url){ if(!silent) alert('백엔드 URL을 먼저 입력해주세요.'); return {ok:false}; }
+  if(!silent) showLoading(true);
+  try{
+    const res = await fetch(url, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) });
+    return await res.json();
+  }catch(err){
+    if(!silent) alert('서버 통신 오류: 백엔드 URL이 맞는지, 배포가 "전체" 액세스로 되어있는지 확인해주세요.\n('+err+')');
+    return {ok:false, error:String(err)};
+  }finally{
+    if(!silent) showLoading(false);
+  }
+}
+
+function showLoading(on){
+  let el = document.getElementById('loadingOverlay');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'loadingOverlay';
+    el.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.25); z-index:9999; display:none; align-items:center; justify-content:center;';
+    el.innerHTML = `<div style="background:white; padding:16px 24px; border-radius:8px; border-top:6px solid var(--red); font-size:13px; font-weight:bold; color:var(--black); box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+      <i class="fa fa-spinner fa-spin" style="color:var(--red); margin-right:8px;"></i>서버와 통신 중...
+    </div>`;
+    document.body.appendChild(el);
+  }
+  el.style.display = on ? 'flex' : 'none';
+}
+
+async function doLogin(){
+  const id = document.getElementById('loginId').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  const errEl = document.getElementById('loginError');
+  errEl.innerText = '';
+  if(!id || !pw){ errEl.innerText = '아이디와 비밀번호를 입력해주세요.'; return; }
+  const res = await callBackend({ action:'login', id, pw });
+  if(res.ok){
+    currentUser = res.user;
+    localStorage.setItem('tj_user', JSON.stringify(currentUser));
+    enterApp();
+  } else {
+    errEl.innerText = res.error || '로그인에 실패했습니다.';
+  }
+}
+
+// 프로필 사진은 원본 그대로 서버(시트)에 저장하면 용량이 커서, 300px/JPEG 0.75로 압축해 저장한다.
+function handleRegPhoto(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 300;
+      let w = img.width, h = img.height;
+      if(w > MAX || h > MAX){
+        if(w >= h){ h = Math.round(h*(MAX/w)); w = MAX; } else { w = Math.round(w*(MAX/h)); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      regPhotoData = canvas.toDataURL('image/jpeg', 0.75);
+      const prev = document.getElementById('regPhotoPreview');
+      prev.src = regPhotoData; prev.style.display = 'inline-block';
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function doRegister(){
+  const id = document.getElementById('regId').value.trim();
+  const pw = document.getElementById('regPw').value;
+  const name = document.getElementById('regName').value.trim();
+  const role = document.getElementById('regRole').value;
+  const errEl = document.getElementById('regError');
+  errEl.innerText = '';
+  if(!id||!pw||!name){ errEl.innerText = '모든 항목을 입력해주세요.'; return; }
+  const res = await callBackend({ action:'register', id, pw, name, role, photo: regPhotoData });
+  if(res.ok){
+    alert('회원가입이 완료되었습니다! 로그인해주세요.');
+    toggleForm('login');
+    document.getElementById('loginId').value = id;
+    regPhotoData = "";
+  } else {
+    errEl.innerText = res.error || '회원가입에 실패했습니다.';
+  }
+}
+
+function logout(){
+  currentUser = null; currentEntry = null; currentPlayerId = null;
+  localStorage.removeItem('tj_user');
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+/* ===================== 구글 로그인 ===================== */
+let pendingGoogleAuth = null;
+
+function waitForGoogleThenInit(){
+  const clientId = document.getElementById('googleClientId').value.trim();
+  if(clientId) localStorage.setItem('tj_google_client_id', clientId);
+  if(!clientId) return;
+  let tries = 0;
+  const timer = setInterval(()=>{
+    tries++;
+    if(window.google && google.accounts && google.accounts.id){
+      clearInterval(timer);
+      initGoogleSignIn(clientId);
+    } else if(tries > 50){
+      clearInterval(timer);
+      document.getElementById('googleError').innerText = '구글 로그인 스크립트를 불러오지 못했습니다. 네트워크 상태를 확인해주세요.';
+    }
+  }, 100);
+}
+
+function initGoogleSignIn(clientId){
+  try{
+    google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredential });
+    const container = document.getElementById('googleBtnContainer');
+    container.innerHTML = '';
+    google.accounts.id.renderButton(container, { theme:'outline', size:'large', text:'signin_with', width:260 });
+  }catch(e){
+    document.getElementById('googleError').innerText = '구글 로그인 초기화 실패: ' + e;
+  }
+}
+
+async function handleGoogleCredential(response){
+  const clientId = document.getElementById('googleClientId').value.trim();
+  const errEl = document.getElementById('googleError');
+  errEl.innerText = '';
+  const res = await callBackend({ action:'googleLogin', idToken: response.credential, clientId });
+  if(res.ok){
+    currentUser = res.user;
+    localStorage.setItem('tj_user', JSON.stringify(currentUser));
+    enterApp();
+  } else if(res.needsRegister){
+    pendingGoogleAuth = { idToken: response.credential, clientId };
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('kakaoRegisterForm').style.display = 'none';
+    document.getElementById('googleRegisterForm').style.display = 'block';
+    document.getElementById('googleRegName').innerText = res.name || res.email;
+  } else {
+    errEl.innerText = res.error || '구글 로그인 실패';
+  }
+}
+
+async function finishGoogleRegister(){
+  if(!pendingGoogleAuth) return;
+  const role = document.getElementById('googleRegRole').value;
+  const errEl = document.getElementById('googleRegError');
+  const res = await callBackend({ action:'googleRegister', idToken: pendingGoogleAuth.idToken, clientId: pendingGoogleAuth.clientId, role });
+  if(res.ok){
+    currentUser = res.user;
+    localStorage.setItem('tj_user', JSON.stringify(currentUser));
+    pendingGoogleAuth = null;
+    document.getElementById('googleRegisterForm').style.display = 'none';
+    enterApp();
+  } else {
+    errEl.innerText = res.error || '가입 실패';
+  }
+}
+
+/* ===================== 카카오 로그인 ===================== */
+let pendingKakaoAuth = null; // 최초 로그인 시(가입 전) 임시로 카카오 정보를 들고 있는 변수
+
+function startKakaoLogin(){
+  const key = getKakaoJsKey();
+  const errEl = document.getElementById('kakaoError');
+  errEl.innerText = '';
+  if(!key){ errEl.innerText = '카카오 JavaScript 키를 먼저 입력해주세요.'; return; }
+  if(!getBackendUrl()){ errEl.innerText = '백엔드 URL을 먼저 입력해주세요.'; return; }
+  if(location.protocol === 'file:'){ errEl.innerText = '카카오 로그인은 https로 호스팅된 주소에서만 동작해요. 로컬 파일(file://)에서는 사용할 수 없습니다.'; return; }
+
+  try{
+    if(!Kakao.isInitialized()) Kakao.init(key);
+  }catch(e){ errEl.innerText = '카카오 SDK 초기화 실패: ' + e; return; }
+
+  Kakao.Auth.login({
+    success: function(){
+      Kakao.API.request({
+        url: '/v2/user/me',
+        success: function(res){
+          const kakaoId = res.id;
+          const nickname = (res.kakao_account && res.kakao_account.profile && res.kakao_account.profile.nickname) || (res.properties && res.properties.nickname) || '카카오사용자';
+          const profileImg = (res.kakao_account && res.kakao_account.profile && res.kakao_account.profile.profile_image_url) || (res.properties && res.properties.profile_image) || '';
+          handleKakaoAuthResult(kakaoId, nickname, profileImg);
+        },
+        fail: function(err){ document.getElementById('kakaoError').innerText = '카카오 사용자 정보 조회 실패: ' + JSON.stringify(err); }
+      });
+    },
+    fail: function(err){ document.getElementById('kakaoError').innerText = '카카오 로그인 실패: ' + JSON.stringify(err); }
+  });
+}
+
+async function handleKakaoAuthResult(kakaoId, nickname, profileImg){
+  const res = await callBackend({ action:'kakaoLogin', kakaoId });
+  if(!res.ok){ document.getElementById('kakaoError').innerText = res.error || '로그인 실패'; return; }
+  if(res.found){
+    currentUser = res.user;
+    localStorage.setItem('tj_user', JSON.stringify(currentUser));
+    enterApp();
+  } else {
+    pendingKakaoAuth = { kakaoId, nickname, profileImg };
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('kakaoRegisterForm').style.display = 'block';
+    document.getElementById('kakaoRegName').value = nickname;
+  }
+}
+
+async function finishKakaoRegister(){
+  if(!pendingKakaoAuth) return;
+  const name = document.getElementById('kakaoRegName').value.trim();
+  const role = document.getElementById('kakaoRegRole').value;
+  const errEl = document.getElementById('kakaoRegError');
+  if(!name){ errEl.innerText = '이름을 입력해주세요.'; return; }
+  const res = await callBackend({ action:'kakaoRegister', kakaoId: pendingKakaoAuth.kakaoId, name, role, photo: pendingKakaoAuth.profileImg });
+  if(res.ok){
+    currentUser = res.user;
+    localStorage.setItem('tj_user', JSON.stringify(currentUser));
+    pendingKakaoAuth = null;
+    document.getElementById('kakaoRegisterForm').style.display = 'none';
+    enterApp();
+  } else {
+    errEl.innerText = res.error || '가입 실패';
+  }
+}
+
+/* ===================== 앱 진입 ===================== */
+function enterApp(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  document.getElementById('userLabel').innerText = `${currentUser.name} (${currentUser.role==='player'?'선수':'지도자'}${currentUser.isAdmin?' · 관리자':''})`;
+  const avatarEl = document.getElementById('userAvatar');
+  if(currentUser.photo){ avatarEl.src = currentUser.photo; avatarEl.style.display = 'inline-block'; } else { avatarEl.style.display = 'none'; }
+  if(currentUser.role === 'player'){
+    currentPlayerId = currentUser.id; currentPlayerName = currentUser.name;
+    renderPlayerSidebar();
+  } else {
+    renderCoachSidebar();
+  }
+}
+
+function typeSelectorHtml(id){
+  return `<select id="${id}" onchange="onTypeChange()">
+    <option value="dribble">드리블 주기화</option>
+    <option value="pass">패스 주기화</option>
+    <option value="touch">터치 주기화</option>
+  </select>`;
+}
+
+/* ===================== 선수용 사이드바 ===================== */
+function renderPlayerSidebar(){
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = `
+    <h3>일지 유형</h3>
+    ${typeSelectorHtml('typeSelect')}
+    <h3>새 주차 작성</h3>
+    <label style="font-size:11px; color:#64748b;">주차 시작일 (월요일)</label>
+    <input type="date" id="newWeekDate">
+    <label style="font-size:11px; color:#64748b;">주차 라벨</label>
+    <input type="text" id="newWeekLabel" placeholder="예: 1주차" value="1주차">
+    <button class="btn btn-red" onclick="createNewEntry(false)">새 일지 만들기</button>
+    <button class="btn btn-outline" onclick="createNewEntry(true)">지난 주 목표 불러와서 시작</button>
+    <button class="btn btn-outline" onclick="showGrowthChart()"><i class="fa fa-chart-line"></i> 성장 추이 보기</button>
+    <hr>
+    <h3>내 일지 목록</h3>
+    <div id="archiveList">불러오는 중...</div>
+  `;
+  document.getElementById('typeSelect').value = currentType;
+  loadArchive();
+}
+
+function hideAllMainPanels(){
+  document.getElementById('journalWrapper').style.display='none';
+  document.getElementById('dashboardWrapper').style.display='none';
+  document.getElementById('byTypeWrapper').style.display='none';
+  document.getElementById('emptyMsg').style.display='none';
+}
+
+async function onTypeChange(){
+  currentType = document.getElementById('typeSelect').value;
+  currentEntry = null;
+  hideAllMainPanels();
+  document.getElementById('emptyMsg').style.display='block';
+  loadArchive();
+}
+
+async function loadArchive(){
+  const listEl = document.getElementById('archiveList');
+  if(!currentPlayerId){ listEl.innerHTML = '선수를 먼저 선택해주세요.'; return; }
+  const res = await callBackend({ action:'listEntries', playerId: currentPlayerId, type: currentType });
+  if(!res.ok){ listEl.innerHTML = '목록을 불러오지 못했습니다.'; return; }
+  if(res.entries.length===0){ listEl.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">아직 작성된 일지가 없습니다.</div>'; return; }
+  const canDelete = currentUser.role === 'coach';
+  listEl.innerHTML = res.entries.map(en => `
+    <div class="archive-item">
+      <span onclick="loadEntry('${en.entryId}')" style="flex:1; cursor:pointer;">${en.weekLabel || ''} <span style="color:#94a3b8;">(${en.weekStartDate})</span></span>
+      ${canDelete ? `<i class="fa fa-trash" style="color:#ef4444; cursor:pointer; margin-left:8px;" onclick="event.stopPropagation(); deleteArchiveEntry('${en.entryId}')"></i>` : `<i class="fa fa-chevron-right" style="color:#cbd5e1;"></i>`}
+    </div>
+  `).join('');
+}
+
+async function deleteArchiveEntry(entryId){
+  if(!confirm('이 일지 기록을 영구 삭제하시겠습니까?')) return;
+  const res = await callBackend({ action:'deleteEntry', entryId, requesterId: currentUser.id });
+  if(res.ok){
+    if(currentEntry && currentEntry.entryId === entryId){
+      currentEntry = null;
+      document.getElementById('journalWrapper').style.display='none';
+      document.getElementById('emptyMsg').style.display='block';
+    }
+    loadArchive();
+  } else {
+    alert(res.error || '삭제 실패');
+  }
+}
+
+async function createNewEntry(copyFromLast){
+  const dateVal = document.getElementById('newWeekDate').value;
+  const label = document.getElementById('newWeekLabel').value.trim() || '1주차';
+  if(!dateVal){ alert('주차 시작일을 선택해주세요.'); return; }
+  const cats = JournalTypes[currentType].categories;
+  currentEntry = {
+    entryId: null,
+    playerId: currentPlayerId,
+    playerName: currentPlayerName,
+    type: currentType,
+    weekStartDate: dateVal,
+    weekLabel: label,
+    goals: {}, // day -> [텍스트, ...]
+    playerScores: cats.map(()=>0),
+    coachScores: cats.map(()=>0),
+    videos: cats.map(()=>({url:'', name:''})),
+    playerComment: '',
+    coachFeedback: ''
+  };
+  DAYS.forEach(d => currentEntry.goals[d] = cats.map(()=>''));
+
+  if(copyFromLast){
+    const res = await callBackend({ action:'getAllData', requesterId: currentUser.id });
+    if(res.ok){
+      const prev = res.entries
+        .filter(e => e.playerId === currentPlayerId && e.type === currentType && e.goals)
+        .sort((a,b) => new Date(b.weekStartDate) - new Date(a.weekStartDate))[0];
+      if(prev){
+        DAYS.forEach(d => { if(prev.goals[d]) currentEntry.goals[d] = prev.goals[d].slice(0, cats.length); });
+        alert(`지난 일지(${prev.weekLabel||prev.weekStartDate})의 목적을 불러왔어요. 점수/영상은 새로 입력해주세요.`);
+      } else {
+        alert('불러올 이전 일지가 없습니다. 빈 일지로 시작할게요.');
+      }
+    }
+  }
+  renderJournal();
+}
+
+function loadEntry(entryId){
+  callBackend({ action:'getEntry', entryId }).then(res=>{
+    if(!res.ok){ alert(res.error||'불러오기 실패'); return; }
+    currentEntry = res.entry;
+    // [자가치유] 예전 버전 버그로 entryId가 비어있는 채 저장된 데이터를 불러오더라도,
+    // 지금 불러온 실제 행 ID를 강제로 다시 채워서 다음 저장부터는 확실히 "덮어쓰기"가 되게 한다.
+    currentEntry.entryId = entryId;
+    currentEntry.playerComment = currentEntry.playerComment || '';
+    currentEntry.coachFeedback = currentEntry.coachFeedback || '';
+    currentType = currentEntry.type;
+    if(document.getElementById('typeSelect')) document.getElementById('typeSelect').value = currentType;
+    renderJournal();
+  });
+}
+
+/* ===================== 지도자용 사이드바 ===================== */
+async function showDashboard(){
+  const res = await callBackend({ action:'getAllData', requesterId: currentUser.id });
+  if(!res.ok){ alert(res.error||'권한이 없습니다.'); return; }
+  hideAllMainPanels();
+  document.getElementById('dashboardWrapper').style.display = 'block';
+
+  const players = res.users.filter(u=>u.role==='player');
+  const thisMonday = toDateStr(getMonday(new Date()));
+  const typeKeys = Object.keys(JournalTypes);
+
+  let overallPlayerSum=0, overallPlayerCount=0, overallCoachSum=0, overallCoachCount=0;
+
+  let rowsHtml = players.map(p=>{
+    let cellsHtml = typeKeys.map(t=>{
+      const es = res.entries.filter(e=>e.playerId===p.id && e.type===t && e.playerScores);
+      es.sort((a,b)=> new Date(b.weekStartDate)-new Date(a.weekStartDate));
+      const latest = es[0];
+      if(!latest){ return `<td style="text-align:center; color:#cbd5e1; padding:8px;">미작성</td>`; }
+      const done = latest.weekStartDate >= thisMonday;
+      const pAvg = avg(latest.playerScores), cAvg = avg(latest.coachScores);
+      overallPlayerSum += pAvg; overallPlayerCount++;
+      overallCoachSum += cAvg; overallCoachCount++;
+      return `<td style="text-align:center; padding:8px;">
+        <div style="font-size:10px; color:${done?'#16a34a':'#ef4444'}; font-weight:bold;">${done? '✔ 이번주 작성':'⚠ '+(latest.weekLabel||latest.weekStartDate)}</div>
+        <div style="font-size:10.5px;">선수 ${pAvg} · 지도자 ${cAvg}</div>
+      </td>`;
+    }).join('');
+    return `<tr style="border-bottom:1px solid #eee;">
+      <td style="font-weight:bold; padding:8px; white-space:nowrap;">
+        ${p.photo?`<img src="${p.photo}" style="width:22px;height:22px;border-radius:50%;object-fit:cover; vertical-align:middle; margin-right:6px;">`:''}${p.name}
+      </td>
+      ${cellsHtml}
+    </tr>`;
+  }).join('');
+
+  const teamPlayerAvg = overallPlayerCount ? Math.round(overallPlayerSum/overallPlayerCount*10)/10 : 0;
+  const teamCoachAvg = overallCoachCount ? Math.round(overallCoachSum/overallCoachCount*10)/10 : 0;
+
+  document.getElementById('dashboardCard').innerHTML = `
+    <h2 style="margin:0 0 4px; color:var(--black);">전체 대시보드</h2>
+    <div style="font-size:11px; color:#64748b; margin-bottom:16px;">이번 주(${thisMonday}~) 기준 작성 현황</div>
+    <div style="display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:140px; background:#fff5f5; border:1px solid #f1948a; border-radius:8px; padding:14px; text-align:center;">
+        <div style="font-size:11px; color:#64748b;">팀 평균 (선수 자가평가)</div>
+        <div style="font-size:24px; font-weight:900; color:var(--red);">${teamPlayerAvg}</div>
+      </div>
+      <div style="flex:1; min-width:140px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:14px; text-align:center;">
+        <div style="font-size:11px; color:#64748b;">팀 평균 (지도자 평가)</div>
+        <div style="font-size:24px; font-weight:900; color:var(--black);">${teamCoachAvg}</div>
+      </div>
+      <button class="btn btn-outline" style="flex:0 0 auto; align-self:center;" onclick="exportExcel()"><i class="fa fa-file-excel"></i> 전체 엑셀 백업</button>
+    </div>
+    <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:11.5px; min-width:600px;">
+      <thead><tr style="background:var(--black); color:white;">
+        <th style="padding:8px; text-align:left;">선수</th>
+        ${typeKeys.map(t=>`<th style="padding:8px;">${JournalTypes[t].title}</th>`).join('')}
+      </tr></thead>
+      <tbody>${rowsHtml || `<tr><td colspan="${typeKeys.length+1}" style="text-align:center; color:#94a3b8; padding:20px;">등록된 선수가 없습니다.</td></tr>`}</tbody>
+    </table>
+    </div>
+  `;
+}
+
+async function renderCoachSidebar(){
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = `<button class="btn btn-black" onclick="showDashboard()"><i class="fa fa-table-columns"></i> 전체 대시보드</button>
+    <button class="btn btn-outline" onclick="showByTypePanel()"><i class="fa fa-layer-group"></i> 주기화별로 보기</button>
+    <hr><h3>선수 선택</h3><div id="playerPickArea">불러오는 중...</div>`;
+  if(currentUser.isAdmin){
+    sb.innerHTML += `<hr><h3>권한 관리</h3><div id="permArea"></div>`;
+    sb.innerHTML += `<hr><h3>선수 계정 관리</h3><div id="playerMgmtArea"></div>`;
+  }
+
+  if(!currentUser.granted && !currentUser.isAdmin){
+    document.getElementById('playerPickArea').innerHTML = `<div style="font-size:12px; color:#b45309; background:#fffbeb; border:1px solid #f59e0b; padding:10px; border-radius:6px;">
+      전체 선수 조회 권한이 없습니다.<br>관리자에게 권한 부여를 요청해주세요.
+    </div>`;
+    return;
+  }
+
+  const res = await callBackend({ action:'listUsers' });
+  if(!res.ok){ document.getElementById('playerPickArea').innerHTML = '목록을 불러오지 못했습니다.'; return; }
+  const players = res.users.filter(u => u.role === 'player');
+  players.forEach(p => playersInfo[p.id] = { name: p.name, photo: p.photo || '' });
+  const area = document.getElementById('playerPickArea');
+  if(players.length===0){ area.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">등록된 선수가 없습니다.</div>'; return; }
+  area.innerHTML = `
+    <select id="playerSelect" onchange="onPlayerChange()">
+      <option value="">-- 선수를 선택하세요 --</option>
+      ${players.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
+    </select>
+    <div id="typeAndArchiveArea"></div>
+  `;
+
+  if(currentUser.isAdmin){
+    renderPermPanel(res.users.filter(u=>u.role==='coach'));
+    renderPlayerMgmtPanel(players);
+  }
+}
+
+function renderPlayerMgmtPanel(players){
+  const el = document.getElementById('playerMgmtArea');
+  if(players.length===0){ el.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">등록된 선수가 없습니다.</div>'; return; }
+  el.innerHTML = players.map(p => `
+    <div class="perm-row">
+      <span>${p.photo?`<img src="${p.photo}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:5px;">`:''}${p.name} (${p.id})</span>
+      <button style="background:#ef4444" onclick="deletePlayerAccount('${p.id}', '${escapeHtml(p.name)}')"><i class="fa fa-trash"></i></button>
+    </div>
+  `).join('');
+}
+
+async function deletePlayerAccount(targetId, name){
+  const withEntries = confirm(`[${name}] 선수 계정을 삭제하시겠습니까?\n\n확인 = 계정 + 작성했던 일지 전체 삭제\n취소 후 다시 시도 = 삭제 취소`);
+  if(!withEntries) return;
+  const alsoEntries = confirm('일지 기록도 함께 삭제할까요?\n\n확인 = 계정+일지 전부 삭제 (복구 불가)\n취소 = 계정만 삭제하고 일지는 보관');
+  const res = await callBackend({ action:'deleteUser', adminId: currentUser.id, targetId, deleteEntries: alsoEntries });
+  if(res.ok){
+    alert('삭제되었습니다.');
+    renderCoachSidebar();
+  } else {
+    alert(res.error||'삭제 실패');
+  }
+}
+
+function renderPermPanel(coaches){
+  const el = document.getElementById('permArea');
+  el.innerHTML = coaches.map(c => `
+    <div class="perm-row">
+      <span>${c.name} (${c.id})${c.isAdmin?' <b style="color:var(--red)">관리자</b>':''}</span>
+      ${c.isAdmin ? '' : `<button style="background:${c.granted?'#ef4444':'#16a34a'}" onclick="togglePermission('${c.id}', ${!c.granted})">${c.granted?'권한 회수':'권한 부여'}</button>`}
+    </div>
+  `).join('');
+}
+
+async function togglePermission(targetId, granted){
+  const res = await callBackend({ action:'setPermission', adminId: currentUser.id, targetId, granted });
+  if(res.ok) renderCoachSidebar();
+  else alert(res.error||'변경 실패');
+}
+
+/* ===================== 주기화별로 보기 (지도자용) ===================== */
+let byTypeDataCache = null;
+
+async function showByTypePanel(){
+  hideAllMainPanels();
+  document.getElementById('byTypeWrapper').style.display = 'block';
+  document.getElementById('byTypeCard').innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">불러오는 중...</div>';
+  const res = await callBackend({ action:'getAllData', requesterId: currentUser.id });
+  if(!res.ok){ document.getElementById('byTypeCard').innerHTML = `<div style="color:#ef4444; padding:10px;">${res.error||'불러오기 실패'}</div>`; return; }
+  byTypeDataCache = res;
+  renderByTypeControls();
+}
+
+function renderByTypeControls(){
+  const typeKeys = Object.keys(JournalTypes);
+  document.getElementById('byTypeCard').innerHTML = `
+    <h2 style="margin:0 0 14px; color:var(--black);">주기화별로 보기</h2>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px;">
+      <select id="byTypeType" onchange="onByTypeTypeChange()">
+        ${typeKeys.map(t=>`<option value="${t}">${JournalTypes[t].title}</option>`).join('')}
+      </select>
+      <select id="byTypeWeek" onchange="onByTypeWeekChange()">
+        <option value="">-- 저장된 주차에서 선택 --</option>
+      </select>
+      <span style="font-size:11px; color:#94a3b8;">또는</span>
+      <input type="date" id="byTypeCustomDate" onchange="onByTypeCustomDateChange()" style="padding:7px; border:1px solid #ddd; border-radius:5px;">
+    </div>
+    <div id="byTypeResults"></div>
+  `;
+  refreshByTypeWeeks();
+}
+
+function refreshByTypeWeeks(){
+  const type = document.getElementById('byTypeType').value;
+  const weekSel = document.getElementById('byTypeWeek');
+  const weekMap = {};
+  byTypeDataCache.entries.filter(e=>e.type===type).forEach(e=>{ weekMap[e.weekStartDate] = e.weekLabel || e.weekStartDate; });
+  const weeks = Object.keys(weekMap).sort((a,b)=> new Date(b) - new Date(a));
+  weekSel.innerHTML = '<option value="">-- 저장된 주차에서 선택 --</option>' + weeks.map(w=>`<option value="${w}">${weekMap[w]} (${w})</option>`).join('');
+}
+
+function onByTypeTypeChange(){
+  refreshByTypeWeeks();
+  document.getElementById('byTypeCustomDate').value = '';
+  document.getElementById('byTypeResults').innerHTML = '';
+}
+function onByTypeWeekChange(){
+  const week = document.getElementById('byTypeWeek').value;
+  document.getElementById('byTypeCustomDate').value = '';
+  if(week) renderByTypeResults(document.getElementById('byTypeType').value, week);
+  else document.getElementById('byTypeResults').innerHTML = '';
+}
+function onByTypeCustomDateChange(){
+  const d = document.getElementById('byTypeCustomDate').value;
+  document.getElementById('byTypeWeek').value = '';
+  if(d) renderByTypeResults(document.getElementById('byTypeType').value, d);
+}
+
+function renderByTypeResults(type, weekStartDate){
+  const players = byTypeDataCache.users.filter(u=>u.role==='player');
+  const submitted = [], notSubmitted = [];
+  players.forEach(p=>{
+    const entry = byTypeDataCache.entries.find(e=> e.playerId===p.id && e.type===type && e.weekStartDate===weekStartDate);
+    if(entry) submitted.push({ player:p, entry }); else notSubmitted.push(p);
+  });
+  const resEl = document.getElementById('byTypeResults');
+  resEl.innerHTML = `
+    <div style="display:flex; gap:24px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:220px;">
+        <h4 style="color:#16a34a; margin-bottom:8px;">✔ 제출함 (${submitted.length})</h4>
+        ${submitted.length? submitted.map(s=>`
+          <div class="archive-item" onclick="openByTypeEntry('${s.player.id}', '${escapeHtml(s.player.name)}', '${s.entry.entryId}')">
+            <span>${s.player.photo?`<img src="${s.player.photo}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">`:''}${s.player.name}</span>
+            <span style="font-size:10px; color:#64748b;">선수 ${avg(s.entry.playerScores)} · 지도자 ${avg(s.entry.coachScores)}</span>
+          </div>
+        `).join('') : '<div style="font-size:11.5px; color:#94a3b8;">없음</div>'}
+      </div>
+      <div style="flex:1; min-width:220px;">
+        <h4 style="color:#ef4444; margin-bottom:8px;">⚠ 미제출 (${notSubmitted.length})</h4>
+        ${notSubmitted.length? notSubmitted.map(p=>`
+          <div class="archive-item" style="opacity:0.55; cursor:default;">
+            <span>${p.photo?`<img src="${p.photo}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">`:''}${p.name}</span>
+          </div>
+        `).join('') : '<div style="font-size:11.5px; color:#94a3b8;">없음</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function openByTypeEntry(playerId, playerName, entryId){
+  const entry = byTypeDataCache.entries.find(e=>e.entryId===entryId);
+  if(!entry){ alert('데이터를 찾을 수 없습니다.'); return; }
+  currentPlayerId = playerId;
+  currentPlayerName = playerName;
+  currentType = entry.type;
+  currentEntry = JSON.parse(JSON.stringify(entry));
+  currentEntry.playerComment = currentEntry.playerComment || '';
+  currentEntry.coachFeedback = currentEntry.coachFeedback || '';
+  renderJournal();
+}
+
+function onPlayerChange(){
+  const sel = document.getElementById('playerSelect');
+  currentPlayerId = sel.value;
+  currentPlayerName = sel.options[sel.selectedIndex].text;
+  currentEntry = null;
+  hideAllMainPanels();
+  document.getElementById('emptyMsg').style.display='block';
+  const area = document.getElementById('typeAndArchiveArea');
+  if(!currentPlayerId){ area.innerHTML=''; return; }
+  area.innerHTML = `
+    <h3 style="margin-top:14px;">일지 유형</h3>
+    ${typeSelectorHtml('typeSelect')}
+    <button class="btn btn-outline" onclick="showGrowthChart()"><i class="fa fa-chart-line"></i> 성장 추이 보기</button>
+    <h3>일지 아카이브</h3>
+    <div id="archiveList">불러오는 중...</div>
+  `;
+  document.getElementById('typeSelect').value = currentType;
+  loadArchive();
+}
+
+/* ===================== 일지 렌더링 ===================== */
+function renderJournal(){
+  hideAllMainPanels();
+  document.getElementById('journalWrapper').style.display='block';
+  const isPlayer = currentUser.role === 'player';
+  const isCoach = currentUser.role === 'coach';
+  const cats = JournalTypes[currentEntry.type].categories;
+
+  const playerPhoto = isPlayer ? (currentUser.photo || '') : ((playersInfo[currentPlayerId] && playersInfo[currentPlayerId].photo) || '');
+  let html = `<div class="j-title">
+      ${playerPhoto ? `<img src="${playerPhoto}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; vertical-align:middle; margin-right:8px; border:2px solid var(--gold);">` : ''}
+      ${JournalTypes[currentEntry.type].title} — ${currentEntry.playerName || ''}
+    </div>`;
+  html += `<div class="j-meta">${currentEntry.weekLabel || ''} · 시작일: ${currentEntry.weekStartDate}</div>`;
+
+  html += `<table class="j-table"><thead><tr><th>선수,지도자 (${currentEntry.weekLabel||''})</th>${cats.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+
+  DAYS.forEach(d => {
+    html += `<tr class="goal-row"><td>개인 목적 (${d})</td>`;
+    cats.forEach((c, ci) => {
+      const val = (currentEntry.goals[d] && currentEntry.goals[d][ci]) || '';
+      const disabled = isPlayer ? '' : 'disabled';
+      html += `<td class="goal-cell"><textarea data-day="${d}" data-ci="${ci}" onchange="updateGoal(this)" ${disabled}>${escapeHtml(val)}</textarea></td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `<tr class="score-row"><td>선수</td>`;
+  cats.forEach((c, ci) => {
+    const disabled = isPlayer ? '' : 'disabled';
+    html += `<td class="score-cell">${scoreTapHtml('player', ci, currentEntry.playerScores[ci]||0, disabled)}</td>`;
+  });
+  html += `</tr>`;
+
+  html += `<tr class="score-row"><td>지도자</td>`;
+  cats.forEach((c, ci) => {
+    const disabled = isCoach ? '' : 'disabled';
+    html += `<td class="score-cell">${scoreTapHtml('coach', ci, currentEntry.coachScores[ci]||0, disabled)}</td>`;
+  });
+  html += `</tr>`;
+
+  html += `<tr class="video-row"><td>영상</td>`;
+  cats.forEach((c, ci) => {
+    const v = currentEntry.videos[ci] || {url:'',name:''};
+    html += `<td><div class="video-cell">
+      <input type="text" placeholder="링크 붙여넣기" value="${escapeHtml(v.url||'')}" data-ci="${ci}" onchange="updateVideoLink(this)">
+      <div style="display:flex; gap:4px; align-items:center;">
+        <button class="vfile-btn" onclick="document.getElementById('vfile_${ci}').click()">파일 업로드</button>
+        <input type="file" id="vfile_${ci}" accept="video/mp4,video/quicktime" style="display:none" data-ci="${ci}" onchange="uploadVideoFile(this)">
+      </div>
+      ${v.url ? `<a href="${v.url}" target="_blank">▶ 영상보기</a>` : ''}
+    </div></td>`;
+  });
+  html += `</tr>`;
+
+  html += `</tbody></table>`;
+
+  html += `<div class="legend-row">${cats.map((c,i)=>`<div><span class="legend-dot" style="background:${PALETTE[i]}"></span>${c}</div>`).join('')}</div>`;
+
+  html += `<div class="charts-row">
+    <div class="chart-box"><h4>선수 자가평가 비율</h4><canvas id="playerPie"></canvas></div>
+    <div class="chart-box"><h4>지도자 평가 비율</h4><canvas id="coachPie"></canvas></div>
+  </div>`;
+
+  html += `<div class="comment-box" style="margin-top:20px; background:#fff8f5; border:1px solid #f1948a; border-left:8px solid var(--red); border-radius:6px; padding:14px 18px;">
+    <div style="font-size:12.5px; font-weight:900; color:var(--red); margin-bottom:6px;">✏️ 선수 의견 / 생각</div>
+    <textarea id="playerCommentBox" rows="3" style="width:100%; border:1px solid #e2e8f0; border-radius:5px; padding:8px; font-size:12px; font-family:inherit; resize:vertical;"
+      placeholder="이번 주 훈련하면서 느낀 점, 다음 목표 등을 자유롭게 적어보세요."
+      onchange="updatePlayerComment(this)" ${isPlayer ? '' : 'disabled'}>${escapeHtml(currentEntry.playerComment)}</textarea>
+  </div>`;
+
+  html += `<div class="feedback-box" style="margin-top:12px; background:#f8fafc; border:1px solid #cbd5e1; border-left:8px solid var(--gold); border-radius:6px; padding:14px 18px;">
+    <div style="font-size:12.5px; font-weight:900; color:var(--black); margin-bottom:6px;">🗣 지도자 피드백</div>
+    <textarea id="coachFeedbackBox" rows="3" style="width:100%; border:1px solid #e2e8f0; border-radius:5px; padding:8px; font-size:12px; font-family:inherit; resize:vertical;"
+      placeholder="선수 의견에 대한 피드백과 다음 주 보완점을 적어주세요."
+      onchange="updateCoachFeedback(this)" ${isCoach ? '' : 'disabled'}>${escapeHtml(currentEntry.coachFeedback)}</textarea>
+  </div>`;
+
+  document.getElementById('journalCard').innerHTML = html;
+  drawPies(cats);
+}
+
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function updateGoal(el){
+  const day = el.dataset.day, ci = parseInt(el.dataset.ci);
+  currentEntry.goals[day][ci] = el.value;
+  scheduleAutoSave();
+}
+function scoreTapHtml(rowType, ci, value, disabledAttr){
+  const disabled = !!disabledAttr;
+  let html = `<div class="tap-score-row">`;
+  for(let i=1;i<=5;i++){
+    const isActiveBase = Math.floor(value) === i && value > 0;
+    const isHalf = isActiveBase && (value % 1 !== 0);
+    html += `<button type="button" class="tap-score-btn ${isActiveBase?'active':''} ${isHalf?'half':''}" ${disabled?'disabled':''} onclick="tapScore('${rowType}', ${ci}, ${i})">${i}</button>`;
+  }
+  html += `<span class="tap-score-value">${value||0}</span></div>`;
+  return html;
+}
+
+function tapScore(rowType, ci, i){
+  const isPlayerRow = rowType === 'player';
+  if(isPlayerRow && currentUser.role !== 'player') return;
+  if(!isPlayerRow && currentUser.role !== 'coach') return;
+  const arr = isPlayerRow ? currentEntry.playerScores : currentEntry.coachScores;
+  const cur = arr[ci] || 0;
+  // 1번째 탭: 정수 점수, 2번째(같은 버튼 다시 탭): +0.5, 3번째: 0으로 초기화
+  if(Math.floor(cur) === i && cur > 0){
+    arr[ci] = (cur % 1 !== 0) ? 0 : i + 0.5;
+  } else {
+    arr[ci] = i;
+  }
+  renderJournal();
+  scheduleAutoSave();
+}
+function updateVideoLink(el){
+  const ci = parseInt(el.dataset.ci);
+  currentEntry.videos[ci] = { url: el.value, name: '' };
+  scheduleAutoSave();
+}
+function updatePlayerComment(el){ currentEntry.playerComment = el.value; scheduleAutoSave(); }
+function updateCoachFeedback(el){ currentEntry.coachFeedback = el.value; scheduleAutoSave(); }
+
+async function uploadVideoFile(el){
+  const file = el.files[0]; if(!file) return;
+  if(file.size > 25*1024*1024){ alert('25MB를 초과하는 파일은 업로드가 원활하지 않을 수 있습니다. 가능하면 압축하거나 링크로 공유해주세요.'); }
+  const ci = parseInt(el.dataset.ci);
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const res = await callBackend({ action:'uploadVideo', base64: ev.target.result, filename: file.name, mimeType: file.type });
+    if(res.ok){
+      currentEntry.videos[ci] = { url: res.previewUrl, name: file.name };
+      renderJournal();
+      alert('영상 업로드 완료!');
+    } else {
+      alert('업로드 실패: ' + (res.error||''));
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function drawPies(cats){
+  const labels = cats;
+  const pSum = currentEntry.playerScores.reduce((a,b)=>a+b,0) || 1;
+  const cSum = currentEntry.coachScores.reduce((a,b)=>a+b,0) || 1;
+  const pData = currentEntry.playerScores.map(v=> Math.round(v/pSum*1000)/10);
+  const cData = currentEntry.coachScores.map(v=> Math.round(v/cSum*1000)/10);
+
+  if(playerChart) playerChart.destroy();
+  if(coachChart) coachChart.destroy();
+
+  const opts = { responsive:true, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.label+': '+c.parsed+'%'}} } };
+
+  playerChart = new Chart(document.getElementById('playerPie'), { type:'pie', data:{ labels, datasets:[{ data:pData, backgroundColor:PALETTE }] }, options: opts });
+  coachChart = new Chart(document.getElementById('coachPie'), { type:'pie', data:{ labels, datasets:[{ data:cData, backgroundColor:PALETTE }] }, options: opts });
+}
+
+/* ===================== 저장 / 내보내기 ===================== */
+async function exportExcel(){
+  const res = await callBackend({ action:'getAllData', requesterId: currentUser.id });
+  if(!res.ok){ alert(res.error||'내보내기 실패'); return; }
+
+  const summaryRows = res.entries.map(e => ({
+    선수: e.playerName, 유형: (JournalTypes[e.type]||{}).title || e.type,
+    주차: e.weekLabel, 시작일: e.weekStartDate,
+    선수평균: avg(e.playerScores), 지도자평균: avg(e.coachScores),
+    선수의견: e.playerComment || '', 지도자피드백: e.coachFeedback || '',
+    수정일: e.updatedAt
+  }));
+  const userRows = res.users.map(u => ({ 아이디: u.id, 이름: u.name, 역할: u.role==='player'?'선수':'지도자', 전체조회권한: u.granted?'O':'X' }));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryRows), "일지요약");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(userRows), "사용자");
+  XLSX.writeFile(wb, `FC_SEOUL_훈련일지_백업_${toDateStr(new Date())}.xlsx`);
+}
+
+async function saveEntry(){
+  if(!currentEntry) return;
+  const res = await callBackend({ action:'saveEntry', entry: currentEntry, editedBy: currentUser.id });
+  if(res.ok){
+    currentEntry.entryId = res.entryId;
+    alert('저장되었습니다.');
+    loadArchive();
+  } else {
+    alert('저장 실패: ' + (res.error||''));
+  }
+}
+
+// [자동저장] 입력을 멈춘 뒤 2초 후 조용히(로딩 표시/알림 없이) 백그라운드로 저장한다.
+let autoSaveTimer = null;
+function scheduleAutoSave(){
+  if(!currentEntry) return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(silentAutoSave, 2000);
+}
+async function silentAutoSave(){
+  if(!currentEntry) return;
+  const res = await callBackend({ action:'saveEntry', entry: currentEntry, editedBy: currentUser.id }, true);
+  if(res.ok){
+    currentEntry.entryId = res.entryId;
+    showAutoSaveToast();
+  }
+}
+function showAutoSaveToast(){
+  let el = document.getElementById('autoSaveToast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'autoSaveToast';
+    el.style.cssText = 'position:fixed; bottom:16px; right:16px; background:#16a34a; color:white; padding:8px 16px; border-radius:20px; font-size:11.5px; font-weight:bold; z-index:9999; opacity:0; transition:opacity 0.3s; box-shadow:0 4px 15px rgba(0,0,0,0.3);';
+    el.innerHTML = '<i class="fa fa-check"></i> 자동저장됨';
+    document.body.appendChild(el);
+  }
+  el.style.opacity = '1';
+  clearTimeout(el._hideTimer);
+  el._hideTimer = setTimeout(()=>{ el.style.opacity='0'; }, 1500);
+}
+
+async function exportPNG(){
+  const el = document.getElementById('journalCard');
+  const canvas = await html2canvas(el, { scale:2, useCORS:true, backgroundColor:'#ffffff' });
+  const url = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url; a.download = `훈련일지_${currentEntry.playerName}_${currentEntry.weekStartDate}.png`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+</script>
+</body>
+</html>
