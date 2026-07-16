@@ -137,6 +137,9 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
     </div>
     <div class="login-body">
 
+      <div id="googleBtnContainer" style="margin-bottom:10px; display:flex; justify-content:center;"></div>
+      <div class="err" id="googleError"></div>
+
       <div class="cfg-box" id="backendConfigBox">
         <label>백엔드 URL</label>
         <input type="text" id="backendUrl" placeholder="https://script.google.com/macros/s/.../exec">
@@ -144,8 +147,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
       <div class="cfg-box" id="googleConfigBox">
         <label>구글 로그인용 Client ID</label>
         <input type="text" id="googleClientId" placeholder="xxxxx.apps.googleusercontent.com" onchange="waitForGoogleThenInit()">
-        <div id="googleBtnContainer" style="margin-top:10px; display:flex; justify-content:center;"></div>
-        <div class="err" id="googleError"></div>
       </div>
       <div id="showConfigToggle" style="display:none; text-align:center; margin-bottom:10px;">
         <span class="toggle-link" onclick="toggleConfigBoxes()">⚙ 서버 설정 보기/변경 (관리자용)</span>
