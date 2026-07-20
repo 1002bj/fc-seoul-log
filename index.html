@@ -183,9 +183,16 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
       </div>
 
       <div id="googleRegisterForm" style="display:none;">
-        <p style="font-size:12px; color:#64748b; margin-top:0;"><b id="googleRegName"></b>님, 처음 로그인이시네요. 역할만 선택해주세요.</p>
+        <p style="font-size:12px; color:#64748b; margin-top:0;"><b id="googleRegName"></b>님, 처음 로그인이시네요.</p>
+        <label>프로필 사진</label>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <img id="googleRegPhotoPreview" src="" style="width:48px; height:48px; border-radius:50%; object-fit:cover; background:#f1f5f9; border:1px solid #cbd5e1; display:none;">
+          <input type="file" id="googleRegPhoto" accept="image/*" onchange="handleGoogleRegPhoto(event)" style="flex:1;">
+        </div>
         <label>역할</label>
         <select id="googleRegRole"><option value="player">선수</option><option value="coach">지도자</option></select>
+        <label>비밀번호 (선택 — 설정하면 아이디/비밀번호로도 로그인 가능)</label>
+        <input type="password" id="googleRegPw" placeholder="비워두면 구글 로그인만 사용">
         <div class="err" id="googleRegError"></div>
         <button class="btn btn-red" onclick="finishGoogleRegister()">가입 완료</button>
       </div>
@@ -251,7 +258,7 @@ const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 
 let currentUser = null, currentType = "dribble", currentEntry = null;
 let currentPlayerId = null, currentPlayerName = null, sidebarMode = "cycle";
-let regPhotoData = "", pendingGoogleAuth = null, pendingDiaryPhoto = null;
+let regPhotoData = "", googleRegPhotoData = "", pendingGoogleAuth = null, pendingDiaryPhoto = null;
 let playersInfo = {}, diaryListCache = [], byTypeCache = null;
 let playerChart, coachChart, growthChart, autoSaveTimer;
 
@@ -315,23 +322,38 @@ function toast(msg){
 }
 
 /* ---------- 로그인 / 회원가입 ---------- */
-function handleRegPhoto(e){
-  const file = e.target.files[0]; if (!file) return;
+function compressImage(file, maxDim, quality, onDone){
   const reader = new FileReader();
   reader.onload = ev => {
     const img = new Image();
     img.onload = () => {
-      const MAX = 300; let w=img.width, h=img.height;
-      if (w>MAX || h>MAX) { if (w>=h){ h=Math.round(h*MAX/w); w=MAX; } else { w=Math.round(w*MAX/h); h=MAX; } }
+      let w=img.width, h=img.height;
+      if (w>maxDim || h>maxDim) { if (w>=h){ h=Math.round(h*maxDim/w); w=maxDim; } else { w=Math.round(w*maxDim/h); h=maxDim; } }
       const c = document.createElement('canvas'); c.width=w; c.height=h;
       c.getContext('2d').drawImage(img,0,0,w,h);
-      regPhotoData = c.toDataURL('image/jpeg', 0.75);
-      const prev = document.getElementById('regPhotoPreview');
-      prev.src = regPhotoData; prev.style.display = 'inline-block';
+      onDone(c.toDataURL('image/jpeg', quality));
     };
     img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function handleRegPhoto(e){
+  const file = e.target.files[0]; if (!file) return;
+  compressImage(file, 300, 0.75, dataUrl => {
+    regPhotoData = dataUrl;
+    const prev = document.getElementById('regPhotoPreview');
+    prev.src = dataUrl; prev.style.display = 'inline-block';
+  });
+}
+
+function handleGoogleRegPhoto(e){
+  const file = e.target.files[0]; if (!file) return;
+  compressImage(file, 300, 0.75, dataUrl => {
+    googleRegPhotoData = dataUrl;
+    const prev = document.getElementById('googleRegPhotoPreview');
+    prev.src = dataUrl; prev.style.display = 'inline-block';
+  });
 }
 
 async function doLogin(){
@@ -401,18 +423,24 @@ async function onGoogleCredential(response){
   const res = await api({ action:'googleLogin', idToken: response.credential, clientId });
   if (res.ok) { setUser(res.user); }
   else if (res.needsRegister) {
-    pendingGoogleAuth = { idToken: response.credential, clientId };
+    pendingGoogleAuth = { idToken: response.credential, clientId, photo: res.photo || '' };
+    googleRegPhotoData = '';
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'none';
     document.getElementById('googleRegisterForm').style.display = 'block';
     document.getElementById('googleRegName').innerText = res.name || res.email;
+    document.getElementById('googleRegPw').value = '';
+    const prev = document.getElementById('googleRegPhotoPreview');
+    if (res.photo) { prev.src = res.photo; prev.style.display = 'inline-block'; } else prev.style.display = 'none';
   } else { err.innerText = res.error; }
 }
 async function finishGoogleRegister(){
   if (!pendingGoogleAuth) return;
   const role = document.getElementById('googleRegRole').value;
+  const pw = document.getElementById('googleRegPw').value;
+  const photo = googleRegPhotoData || pendingGoogleAuth.photo || '';
   const err = document.getElementById('googleRegError');
-  const res = await api({ action:'googleRegister', idToken: pendingGoogleAuth.idToken, clientId: pendingGoogleAuth.clientId, role });
+  const res = await api({ action:'googleRegister', idToken: pendingGoogleAuth.idToken, clientId: pendingGoogleAuth.clientId, role, pw, photo });
   if (res.ok) { pendingGoogleAuth = null; document.getElementById('googleRegisterForm').style.display='none'; setUser(res.user); }
   else { err.innerText = res.error; }
 }
@@ -454,7 +482,8 @@ function switchMode(mode){
   document.getElementById('modeCycle').classList.toggle('active', mode==='cycle');
   document.getElementById('modeDiary').classList.toggle('active', mode==='diary');
   currentEntry = null; showEmpty();
-  mode === 'cycle' ? renderCycleBody() : renderDiaryBody();
+  if (mode !== 'cycle') { currentUser.role === 'player' ? renderDiaryBody() : renderCoachDiaryBody(); }
+  else renderCycleBody();
 }
 
 function renderCycleBody(){
@@ -553,22 +582,20 @@ function renderDiaryBody(){
   loadDiaryList();
 }
 
+function renderCoachDiaryBody(){
+  document.getElementById('sidebarBody').innerHTML = `
+    <h3>${currentPlayerName || ''} 일지 사진</h3>
+    <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">날짜를 선택하면 사진을 볼 수 있어요.</p>
+    <div id="diaryList">불러오는 중...</div>`;
+  loadDiaryList();
+}
+
 function handleDiaryPhoto(e){
   const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const img = new Image();
-    img.onload = () => {
-      const MAX = 1400; let w=img.width, h=img.height;
-      if (w>MAX || h>MAX) { if (w>=h){ h=Math.round(h*MAX/w); w=MAX; } else { w=Math.round(w*MAX/h); h=MAX; } }
-      const c = document.createElement('canvas'); c.width=w; c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      pendingDiaryPhoto = c.toDataURL('image/jpeg', 0.85);
-      const prev = document.getElementById('diaryPreview'); prev.src = pendingDiaryPhoto; prev.style.display='block';
-    };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
+  compressImage(file, 1400, 0.85, dataUrl => {
+    pendingDiaryPhoto = dataUrl;
+    const prev = document.getElementById('diaryPreview'); prev.src = dataUrl; prev.style.display='block';
+  });
 }
 
 async function saveDiary(){
