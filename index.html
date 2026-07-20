@@ -183,14 +183,12 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
       </div>
 
       <div id="googleRegisterForm" style="display:none;">
-        <p style="font-size:12px; color:#64748b; margin-top:0;"><b id="googleRegName"></b>님, 처음 로그인이시네요.</p>
+        <p style="font-size:12px; color:#64748b; margin-top:0;"><b id="googleRegName"></b>님, 처음 로그인이시네요. 가입 후 관리자가 역할(선수/지도자)을 지정해주면 이용할 수 있어요.</p>
         <label>프로필 사진</label>
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
           <img id="googleRegPhotoPreview" src="" style="width:48px; height:48px; border-radius:50%; object-fit:cover; background:#f1f5f9; border:1px solid #cbd5e1; display:none;">
           <input type="file" id="googleRegPhoto" accept="image/*" onchange="handleGoogleRegPhoto(event)" style="flex:1;">
         </div>
-        <label>역할</label>
-        <select id="googleRegRole"><option value="player">선수</option><option value="coach">지도자</option></select>
         <label>비밀번호 (선택 — 설정하면 아이디/비밀번호로도 로그인 가능)</label>
         <input type="password" id="googleRegPw" placeholder="비워두면 구글 로그인만 사용">
         <div class="err" id="googleRegError"></div>
@@ -436,11 +434,10 @@ async function onGoogleCredential(response){
 }
 async function finishGoogleRegister(){
   if (!pendingGoogleAuth) return;
-  const role = document.getElementById('googleRegRole').value;
   const pw = document.getElementById('googleRegPw').value;
   const photo = googleRegPhotoData || pendingGoogleAuth.photo || '';
   const err = document.getElementById('googleRegError');
-  const res = await api({ action:'googleRegister', idToken: pendingGoogleAuth.idToken, clientId: pendingGoogleAuth.clientId, role, pw, photo });
+  const res = await api({ action:'googleRegister', idToken: pendingGoogleAuth.idToken, clientId: pendingGoogleAuth.clientId, pw, photo });
   if (res.ok) { pendingGoogleAuth = null; document.getElementById('googleRegisterForm').style.display='none'; setUser(res.user); }
   else { err.innerText = res.error; }
 }
@@ -449,12 +446,25 @@ async function finishGoogleRegister(){
 function enterApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'block';
-  document.getElementById('userLabel').innerText = `${currentUser.name} (${currentUser.role==='player'?'선수':'지도자'}${currentUser.isAdmin?' · 관리자':''})`;
   const av = document.getElementById('userAvatar');
   if (currentUser.photo) { av.src = currentUser.photo; av.style.display = 'inline-block'; } else av.style.display = 'none';
 
+  if (currentUser.role !== 'player' && currentUser.role !== 'coach') { showPendingScreen(); return; }
+
+  document.getElementById('userLabel').innerText = `${currentUser.name} (${currentUser.role==='player'?'선수':'지도자'}${currentUser.isAdmin?' · 관리자':''})`;
   if (currentUser.role === 'player') { currentPlayerId = currentUser.id; currentPlayerName = currentUser.name; renderPlayerSidebar(); }
   else renderCoachSidebar();
+}
+
+function showPendingScreen(){
+  document.getElementById('userLabel').innerText = `${currentUser.name} (승인 대기 중)`;
+  document.getElementById('sidebar').innerHTML = '';
+  hidePanels();
+  document.getElementById('mainArea').innerHTML = `
+    <div class="empty" style="color:white;">
+      <i class="fa fa-hourglass-half" style="font-size:28px; margin-bottom:10px; display:block;"></i>
+      관리자가 아직 역할(선수/지도자)을 지정하지 않았어요.<br>관리자에게 문의해주세요.
+    </div>`;
 }
 
 function hidePanels(){
@@ -659,7 +669,7 @@ async function renderCoachSidebar(){
   if (me) { currentUser.granted = me.granted; currentUser.isAdmin = me.isAdmin; localStorage.setItem('tj_user', JSON.stringify(currentUser)); }
 
   if (currentUser.isAdmin) {
-    sb.innerHTML += `<hr><h3>권한 관리</h3><div id="permArea"></div><hr><h3>선수 계정 관리</h3><div id="playerMgmtArea"></div>`;
+    sb.innerHTML += `<hr><h3>가입 승인 대기</h3><div id="pendingArea"></div><hr><h3>권한 관리</h3><div id="permArea"></div><hr><h3>선수 계정 관리</h3><div id="playerMgmtArea"></div>`;
   }
   if (!currentUser.granted && !currentUser.isAdmin) {
     document.getElementById('playerPickArea').innerHTML = `<div style="font-size:12px; color:#b45309; background:#fffbeb; border:1px solid #f59e0b; padding:10px; border-radius:6px;">전체 선수 조회 권한이 없습니다.<br>관리자에게 권한 부여를 요청해주세요.</div>`;
@@ -672,7 +682,22 @@ async function renderCoachSidebar(){
   if (!players.length) { area.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">등록된 선수가 없습니다.</div>'; return; }
   area.innerHTML = `<select id="playerSelect" onchange="onPlayerChange()"><option value="">-- 선수를 선택하세요 --</option>${players.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select><div id="playerDetailArea"></div>`;
 
-  if (currentUser.isAdmin) { renderPermPanel(res.users.filter(u=>u.role==='coach')); renderPlayerMgmt(players); }
+  if (currentUser.isAdmin) { renderPendingPanel(res.users.filter(u=>u.role!=='player' && u.role!=='coach')); renderPermPanel(res.users.filter(u=>u.role==='coach')); renderPlayerMgmt(players); }
+}
+
+function renderPendingPanel(pending){
+  const el = document.getElementById('pendingArea');
+  if (!pending.length) { el.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">대기 중인 가입자가 없습니다.</div>'; return; }
+  el.innerHTML = pending.map(u => `
+    <div class="perm-row"><span>${u.photo?`<img src="${u.photo}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:5px;">`:''}${u.name} (${u.id})</span>
+    <span style="display:flex; gap:4px;">
+      <button style="background:#0284c7" onclick="approveUser('${u.id}','player')">선수로 승인</button>
+      <button style="background:#16a34a" onclick="approveUser('${u.id}','coach')">지도자로 승인</button>
+    </span></div>`).join('');
+}
+async function approveUser(targetId, role){
+  const res = await api({ action:'setRole', adminId: currentUser.id, targetId, role });
+  if (res.ok) renderCoachSidebar(); else alert(res.error);
 }
 
 function renderPermPanel(coaches){
