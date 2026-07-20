@@ -16,6 +16,8 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- PDF 생성을 위한 jsPDF 라이브러리 추가 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -37,6 +39,8 @@ body{ margin:0; font-family:'Apple SD Gothic Neo', sans-serif; background:var(--
 .btn-red{ background:var(--red); color:white; }
 .btn-black{ background:var(--black); color:white; }
 .btn-outline{ background:white; color:var(--black); border:1px solid #cbd5e1; }
+.btn-blue{ background:#0284c7; color:white; }
+.btn-green{ background:#16a34a; color:white; }
 .toggle-link{ text-align:center; font-size:12px; color:#0284c7; cursor:pointer; margin-top:4px; }
 .err{ color:var(--red); font-size:11.5px; margin:-4px 0 10px; min-height:14px; font-weight:bold; }
 .cfg-box{ background:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; padding:8px; margin-bottom:14px; }
@@ -60,7 +64,7 @@ body{ margin:0; font-family:'Apple SD Gothic Neo', sans-serif; background:var(--
 .mode-toggle button.active{ background:var(--red); color:white; border-color:var(--red); }
 .list-item{ padding:8px 10px; border:1px solid #e2e8f0; border-radius:5px; margin-bottom:6px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center; transition: background 0.2s; }
 .list-item:hover{ background:#f8fafc; }
-.main{ flex:1; padding:20px; overflow:auto; }
+.main{ flex:1; padding:20px; overflow:auto; position: relative; }
 .empty{ color:white; text-align:center; margin-top:60px; font-size:14px; }
 
 .perm-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #eee; font-size:12px; }
@@ -76,6 +80,8 @@ table.j-table td{ border:1px solid #cbd5e1; padding:5px; font-size:11px; vertica
 td.goal-cell{ background:var(--salmon); }
 tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-child{ background:#f1f5f9; font-weight:bold; text-align:center; }
 .goal-cell textarea{ width:100%; border:none; background:transparent; resize:none; font-size:11px; font-family:inherit; min-height:38px; outline: none; }
+.eval-helper { font-size: 9.5px; color: #64748b; margin-top: 6px; font-weight: normal; line-height: 1.4; }
+.eval-helper span { font-weight: bold; }
 .tap-row{ display:flex; align-items:center; justify-content:center; gap:3px; flex-wrap:wrap; }
 .tap-btn{ width:22px; height:22px; border-radius:50%; border:1px solid #cbd5e1; background:white; font-size:10px; font-weight:bold; cursor:pointer; padding:0; transition: all 0.2s;}
 .tap-btn.active{ background:var(--red); border-color:var(--red); color:white; transform: scale(1.1); box-shadow: 0 2px 5px rgba(227,6,19,0.3); }
@@ -123,13 +129,30 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 #uiToast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(50px); background:#16a34a; color:white; padding:12px 24px; border-radius:30px; font-size:13px; font-weight:bold; z-index:9999; opacity:0; transition:all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow:0 5px 15px rgba(0,0,0,0.2); pointer-events:none; display: flex; align-items: center; gap: 8px; }
 #uiToast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
+.alert-box { background: #fff1f2; border: 1px solid #fda4af; border-left: 6px solid #e11d48; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; }
+.alert-box h4 { margin: 0 0 6px 0; color: #be123c; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.alert-item { font-size: 11.5px; color: #4c0519; padding: 6px; background: white; border-radius: 4px; margin-bottom: 4px; border: 1px solid #fecdd3; display: flex; justify-content: space-between; cursor: pointer; transition: background 0.2s; }
+.alert-item:hover { background: #ffe4e6; }
+
+/* PDF Report Hidden Container Style */
+#pdfReportContainer {
+  position: absolute; top: -9999px; left: -9999px; width: 800px; background: white; padding: 40px; color: black;
+}
+.pdf-header { text-align: center; border-bottom: 4px solid var(--red); padding-bottom: 10px; margin-bottom: 20px; }
+.pdf-header h1 { margin: 0; font-size: 24px; font-weight: 900; }
+.pdf-header p { margin: 5px 0 0 0; color: #64748b; font-size: 12px; }
+.pdf-row { display: flex; gap: 20px; margin-bottom: 20px; }
+.pdf-col { flex: 1; }
+.pdf-box { border: 1px solid #cbd5e1; padding: 15px; border-radius: 8px; background: #f8fafc; }
+.pdf-box h3 { margin: 0 0 10px 0; font-size: 14px; color: var(--red); border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+
 @media print{
   body *{ visibility:hidden; }
   #journalCard, #journalCard *{ visibility:visible; }
   #journalCard{ position:absolute; top:0; left:0; width:100%; box-shadow:none; }
 }
 
-/* ★ 모바일 반응형 카드 레이아웃 (개선된 UI) ★ */
+/* 모바일 반응형 카드 레이아웃 */
 @media (max-width: 820px){
   .layout{ flex-direction:column; min-height:auto; }
   .sidebar{ width:100%; border-right:none; border-bottom:4px solid var(--red); max-height:60vh; overflow-y:auto; }
@@ -137,40 +160,24 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   #journalCard{ width:100%; padding:16px 14px; border-top-width:10px; }
   .j-title{ font-size:18px; line-height: 1.3; margin-bottom: 18px; }
   
-  /* 표(Table)를 블록형 카드 디자인으로 변환 */
-  table.j-table thead { display: none; } /* 기존 가로 헤더 숨김 */
+  table.j-table thead { display: none; }
   table.j-table, table.j-table tbody, table.j-table tr, table.j-table td { display: block; width: 100%; }
   
-  /* 각 줄(요일, 선수평가 등)을 독립된 카드로 렌더링 */
   table.j-table tr { margin-bottom: 18px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
   table.j-table td { border: none; border-bottom: 1px solid #e2e8f0; padding: 14px; position: relative; background: white; }
   table.j-table td:last-child { border-bottom: none; }
   
-  /* 자바스크립트에서 주입된 data-label 속성으로 모바일용 타이틀 생성 */
   table.j-table td::before { 
-    content: attr(data-label); 
-    display: block; 
-    font-weight: 900; 
-    font-size: 12.5px; 
-    color: #0f172a; 
-    margin-bottom: 10px; 
-    border-bottom: 2px solid #f1f5f9;
-    padding-bottom: 6px;
+    content: attr(data-label); display: block; font-weight: 900; font-size: 12.5px; color: #0f172a; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px;
   }
   
-  /* 카드 헤더(첫 번째 셀) 강조 스타일 */
   tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-child { 
-    background: var(--black); 
-    color: white; 
-    font-size: 14px; 
-    padding: 12px 14px; 
-    text-align: left; 
-    border-bottom: none;
+    background: var(--black); color: white; font-size: 14px; padding: 12px 14px; text-align: left; border-bottom: none;
   }
-  /* 카드 헤더에서는 라벨을 숨김 */
   tr.goal-row td:first-child::before, tr.score-row td:first-child::before, tr.video-row td:first-child::before { display: none; }
+  .eval-helper { color: #cbd5e1; }
+  .eval-helper span { color: #fca5a5 !important; }
   
-  /* 모바일용 입력란 스타일 보정 */
   .goal-cell textarea { min-height: 50px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #f8fafc; font-size: 13px; margin-top: 4px; }
   .tap-row { justify-content: flex-start; gap: 6px; }
   .tap-btn { width: 34px; height: 34px; font-size: 14px; }
@@ -180,6 +187,10 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 
   .chart-box{ width:100%; margin-bottom: 24px; }
   .card{ padding:14px; }
+
+  /* Analytics Mobile Fixes */
+  .analytics-controls { flex-direction: column; align-items: stretch !important; }
+  .analytics-controls select { width: 100%; margin-bottom: 8px; }
 }
 </style>
 </head>
@@ -192,10 +203,8 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
       <p>선수 개인 훈련일지 (드리블 · 패스 · 터치 주기화 · 포토 일지)</p>
     </div>
     <div class="login-body">
-
       <div id="googleBtnContainer" style="margin-bottom:10px; display:flex; justify-content:center;"></div>
       <div class="err" id="googleError"></div>
-
       <div class="cfg-box" id="backendConfigBox">
         <label>백엔드 URL</label>
         <input type="text" id="backendUrl" placeholder="https://script.google.com/macros/s/.../exec">
@@ -208,7 +217,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
         <span class="toggle-link" onclick="toggleConfigBoxes()">⚙ 서버 설정 보기/변경 (관리자용)</span>
       </div>
       <hr style="margin:14px 0; border:0; border-top:1px solid #eee;">
-
       <div id="loginForm">
         <label>아이디</label>
         <input type="text" id="loginId">
@@ -218,7 +226,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
         <button class="btn btn-red" onclick="doLogin()">로그인</button>
         <div class="toggle-link" onclick="toggleForm('register')">계정이 없으신가요? 회원가입</div>
       </div>
-
       <div id="registerForm" style="display:none;">
         <label>아이디</label>
         <input type="text" id="regId">
@@ -237,7 +244,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
         <button class="btn btn-black" onclick="doRegister()">회원가입</button>
         <div class="toggle-link" onclick="toggleForm('login')">이미 계정이 있으신가요? 로그인</div>
       </div>
-
       <div id="googleRegisterForm" style="display:none;">
         <p style="font-size:12px; color:#64748b; margin-top:0;"><b id="googleRegName"></b>님, 처음 로그인이시네요. 가입 후 관리자가 역할(선수/지도자)을 지정해주면 이용할 수 있어요.</p>
         <label>프로필 사진</label>
@@ -250,7 +256,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
         <div class="err" id="googleRegError"></div>
         <button class="btn btn-red" onclick="finishGoogleRegister()">가입 완료</button>
       </div>
-
     </div>
   </div>
 </div>
@@ -271,6 +276,7 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
     <div class="main" id="mainArea">
       <div id="dashboardWrapper" style="display:none;"><div id="dashboardCard" class="card" style="border-top:10px solid var(--red);"></div></div>
       <div id="byTypeWrapper" style="display:none;"><div id="byTypeCard" class="card" style="border-top:10px solid var(--gold);"></div></div>
+      <div id="analyticsWrapper" style="display:none;"><div id="analyticsCard" class="card" style="border-top:10px solid var(--black);"></div></div>
       <div id="journalWrapper" style="display:none;">
         <div class="actions-row" id="journalActionsRow"></div>
         <div id="journalCard"></div>
@@ -304,8 +310,10 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   </div>
 </div>
 
+<!-- 분기별 리포트 생성을 위한 백그라운드 캔버스 컨테이너 (숨김 처리) -->
+<div id="pdfReportContainer"></div>
+
 <script>
-/* 관리자 설정: 값이 있으면 선수/지도자는 아무 설정 없이 바로 사용 가능 */
 const DEFAULT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbz_20iWlLdSBxGhuZ71F27zWi9jB7dSd0803FVA1Wsw6685O9af7iriwL2b9lsSXvXkJQ/exec";
 const DEFAULT_GOOGLE_CLIENT_ID = "262306396356-8j941hmfg2hntnaiqm5s6aqhddk35qj1.apps.googleusercontent.com";
 
@@ -327,8 +335,10 @@ let currentPlayerId = null, currentPlayerName = null, sidebarMode = "cycle";
 let regPhotoData = "", googleRegPhotoData = "", pendingGoogleAuth = null, pendingDiaryPhoto = null;
 let playersInfo = {}, diaryListCache = [], byTypeCache = null;
 let playerChart, coachChart, growthChart, autoSaveTimer;
+let analyticsRadarChart, analyticsLineChart;
+let reportData = null; // PDF 출력용 임시 데이터 보관
 
-/* ---------- 커스텀 UI 함수 (alert/confirm/toast 대체) ---------- */
+/* ---------- 커스텀 UI 함수 ---------- */
 function uiAlert(msg, title='알림') {
   return new Promise(resolve => {
     document.getElementById('uiModalTitle').innerText = title;
@@ -338,7 +348,6 @@ function uiAlert(msg, title='알림') {
     const overlay = document.getElementById('uiModalOverlay');
     overlay.style.display = 'flex';
     setTimeout(() => document.querySelector('.ui-modal').classList.add('show'), 10);
-    
     btnOk.onclick = () => {
       document.querySelector('.ui-modal').classList.remove('show');
       setTimeout(() => { overlay.style.display = 'none'; resolve(); }, 250);
@@ -356,7 +365,6 @@ function uiConfirm(msg, title='확인') {
     const overlay = document.getElementById('uiModalOverlay');
     overlay.style.display = 'flex';
     setTimeout(() => document.querySelector('.ui-modal').classList.add('show'), 10);
-    
     const close = (res) => {
       document.querySelector('.ui-modal').classList.remove('show');
       setTimeout(() => { overlay.style.display = 'none'; resolve(res); }, 250);
@@ -377,21 +385,16 @@ function uiToast(msg, type='success') {
   clearTimeout(el._t); el._t = setTimeout(()=> el.className='', 2500);
 }
 
-
-/* ---------- 초기화 / 공통 ---------- */
 window.onload = () => {
   const url = DEFAULT_BACKEND_URL || localStorage.getItem('tj_url');
   if (url) { document.getElementById('backendUrl').value = url; localStorage.setItem('tj_url', url); }
-
   const clientId = DEFAULT_GOOGLE_CLIENT_ID || localStorage.getItem('tj_gid');
   if (clientId) { document.getElementById('googleClientId').value = clientId; localStorage.setItem('tj_gid', clientId); waitForGoogleThenInit(); }
-
   if (DEFAULT_BACKEND_URL) {
     document.getElementById('backendConfigBox').style.display = 'none';
     document.getElementById('googleConfigBox').style.display = DEFAULT_GOOGLE_CLIENT_ID ? 'none' : 'block';
     document.getElementById('showConfigToggle').style.display = 'block';
   }
-
   const savedUser = JSON.parse(localStorage.getItem('tj_user') || 'null');
   if (savedUser && url) { currentUser = savedUser; enterApp(); }
 };
@@ -430,7 +433,6 @@ function loading(on){
   el.style.display = on ? 'flex' : 'none';
 }
 
-/* ---------- 로그인 / 회원가입 ---------- */
 function compressImage(file, maxDim, quality, onDone){
   const reader = new FileReader();
   reader.onload = ev => {
@@ -455,7 +457,6 @@ function handleRegPhoto(e){
     prev.src = dataUrl; prev.style.display = 'inline-block';
   });
 }
-
 function handleGoogleRegPhoto(e){
   const file = e.target.files[0]; if (!file) return;
   compressImage(file, 300, 0.75, dataUrl => {
@@ -464,7 +465,6 @@ function handleGoogleRegPhoto(e){
     prev.src = dataUrl; prev.style.display = 'inline-block';
   });
 }
-
 async function doLogin(){
   const id = document.getElementById('loginId').value.trim();
   const pw = document.getElementById('loginPw').value;
@@ -473,7 +473,6 @@ async function doLogin(){
   const res = await api({ action:'login', id, pw });
   if (res.ok) { setUser(res.user); } else { err.innerText = res.error; }
 }
-
 async function doRegister(){
   const id = document.getElementById('regId').value.trim();
   const pw = document.getElementById('regPw').value;
@@ -489,21 +488,17 @@ async function doRegister(){
     regPhotoData = "";
   } else { err.innerText = res.error; }
 }
-
 function setUser(user){
   currentUser = user;
   localStorage.setItem('tj_user', JSON.stringify(user));
   enterApp();
 }
-
 function logout(){
   currentUser = null; currentEntry = null; currentPlayerId = null;
   localStorage.removeItem('tj_user');
   document.getElementById('appScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
 }
-
-/* ---------- 구글 로그인 ---------- */
 function waitForGoogleThenInit(){
   const clientId = document.getElementById('googleClientId').value.trim();
   if (clientId) localStorage.setItem('tj_gid', clientId);
@@ -553,15 +548,12 @@ async function finishGoogleRegister(){
   else { err.innerText = res.error; }
 }
 
-/* ---------- 앱 진입 / 공통 화면 전환 ---------- */
 function enterApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'block';
   const av = document.getElementById('userAvatar');
   if (currentUser.photo) { av.src = currentUser.photo; av.style.display = 'inline-block'; } else av.style.display = 'none';
-
   if (currentUser.role !== 'player' && currentUser.role !== 'coach') { showPendingScreen(); return; }
-
   document.getElementById('userLabel').innerText = `${currentUser.name} (${currentUser.role==='player'?'선수':'지도자'}${currentUser.isAdmin?' · 관리자':''})`;
   if (currentUser.role === 'player') { currentPlayerId = currentUser.id; currentPlayerName = currentUser.name; renderPlayerSidebar(); }
   else renderCoachSidebar();
@@ -579,11 +571,11 @@ function showPendingScreen(){
 }
 
 function hidePanels(){
-  ['journalWrapper','dashboardWrapper','byTypeWrapper','diaryViewWrapper','emptyMsg'].forEach(id => document.getElementById(id).style.display='none');
+  ['journalWrapper','dashboardWrapper','byTypeWrapper','analyticsWrapper','diaryViewWrapper','emptyMsg'].forEach(id => document.getElementById(id).style.display='none');
 }
 function showEmpty(){ hidePanels(); document.getElementById('emptyMsg').style.display='block'; }
-function typeSelectHtml(){
-  return `<select id="typeSelect" onchange="onTypeChange()">
+function typeSelectHtml(id = 'typeSelect', onchangeStr = 'onTypeChange()'){
+  return `<select id="${id}" onchange="${onchangeStr}">
     <option value="dribble">드리블 주기화</option><option value="pass">패스 주기화</option><option value="touch">터치 주기화</option>
   </select>`;
 }
@@ -606,7 +598,6 @@ function switchMode(mode){
   if (mode !== 'cycle') { currentUser.role === 'player' ? renderDiaryBody() : renderCoachDiaryBody(); }
   else renderCycleBody();
 }
-
 function renderCycleBody(){
   document.getElementById('sidebarBody').innerHTML = `
     <h3>일지 유형</h3>${typeSelectHtml()}
@@ -622,7 +613,6 @@ function renderCycleBody(){
   document.getElementById('typeSelect').value = currentType;
   loadArchive();
 }
-
 function onTypeChange(){ currentType = document.getElementById('typeSelect').value; currentEntry = null; showEmpty(); loadArchive(); }
 
 async function loadArchive(){
@@ -686,7 +676,7 @@ function loadEntry(entryId){
   });
 }
 
-/* ---------- 선수 사이드바: 포토 일지 ---------- */
+/* ---------- 선수 포토 일지 ---------- */
 function renderDiaryBody(){
   document.getElementById('sidebarBody').innerHTML = `
     <h3>새 일지 사진</h3>
@@ -705,7 +695,6 @@ function renderDiaryBody(){
     <h3>내 일지 사진 목록</h3><div id="diaryList">불러오는 중...</div>`;
   loadDiaryList();
 }
-
 function renderCoachDiaryBody(){
   document.getElementById('sidebarBody').innerHTML = `
     <h3>${currentPlayerName || ''} 일지 사진</h3>
@@ -713,7 +702,6 @@ function renderCoachDiaryBody(){
     <div id="diaryList">불러오는 중...</div>`;
   loadDiaryList();
 }
-
 function handleDiaryPhoto(e){
   const file = e.target.files[0]; if (!file) return;
   compressImage(file, 1400, 0.85, dataUrl => {
@@ -721,7 +709,6 @@ function handleDiaryPhoto(e){
     const prev = document.getElementById('diaryPreview'); prev.src = dataUrl; prev.style.display='block';
   });
 }
-
 async function saveDiary(){
   if (!pendingDiaryPhoto) { await uiAlert('사진을 먼저 촬영하거나 선택해주세요.'); return; }
   const date = document.getElementById('diaryDate').value;
@@ -738,7 +725,6 @@ async function saveDiary(){
     loadDiaryList();
   } else await uiAlert('저장 실패: ' + res.error, '저장 실패');
 }
-
 async function loadDiaryList(){
   const el = document.getElementById('diaryList'); if (!el) return;
   const res = await api({ action:'listDiary', playerId: currentPlayerId });
@@ -752,7 +738,6 @@ async function loadDiaryList(){
       ${canDel ? `<i class="fa fa-trash" style="color:#ef4444;" onclick="event.stopPropagation(); deleteDiary('${d.diaryId}')"></i>` : ''}
     </div>`).join('');
 }
-
 function viewDiary(diaryId){
   const d = diaryListCache.find(x => x.diaryId === diaryId); if (!d) return;
   hidePanels();
@@ -762,7 +747,6 @@ function viewDiary(diaryId){
     <img src="${d.photoUrl}">
     ${d.memo ? `<p style="font-size:13px; white-space:pre-wrap;">${esc(d.memo)}</p>` : ''}`;
 }
-
 async function deleteDiary(diaryId){
   if (!(await uiConfirm('이 사진을 영구 삭제하시겠습니까?', '사진 삭제'))) return;
   const res = await api({ action:'deleteDiary', diaryId, requesterId: currentUser.id });
@@ -772,9 +756,11 @@ async function deleteDiary(diaryId){
 /* ---------- 지도자 사이드바 ---------- */
 async function renderCoachSidebar(){
   const sb = document.getElementById('sidebar');
-  sb.innerHTML = `<button class="btn btn-black" onclick="showDashboard()"><i class="fa fa-table-columns"></i> 전체 대시보드</button>
+  sb.innerHTML = `
+    <button class="btn btn-black" onclick="showDashboard()"><i class="fa fa-table-columns"></i> 전체 대시보드</button>
+    <button class="btn btn-outline" onclick="showAnalytics()"><i class="fa fa-chart-pie"></i> 📊 선수 심층 분석 (비교/리포트)</button>
     <button class="btn btn-outline" onclick="showByType()"><i class="fa fa-layer-group"></i> 주기화별로 보기</button>
-    <hr><h3>선수 선택</h3><div id="playerPickArea">불러오는 중...</div>`;
+    <hr><h3>선수 선택 (작성/수정)</h3><div id="playerPickArea">불러오는 중...</div>`;
 
   const res = await api({ action:'listUsers' });
   if (!res.ok) { document.getElementById('playerPickArea').innerHTML = '목록을 불러오지 못했습니다.'; return; }
@@ -813,7 +799,6 @@ async function approveUser(targetId, role){
   const res = await api({ action:'setRole', adminId: currentUser.id, targetId, role });
   if (res.ok) renderCoachSidebar(); else await uiAlert(res.error, '승인 오류');
 }
-
 function renderPermPanel(coaches){
   document.getElementById('permArea').innerHTML = coaches.map(c => `
     <div class="perm-row"><span>${c.name} (${c.id})${c.isAdmin?' <b style="color:var(--red)">관리자</b>':''}</span>
@@ -856,6 +841,28 @@ async function showDashboard(){
   if (!res.ok) { await uiAlert(res.error, '오류'); return; }
   hidePanels(); document.getElementById('dashboardWrapper').style.display = 'block';
 
+  // 피드백 미작성(할 일) 목록 추출
+  const pendingFeedbacks = res.entries.filter(e => {
+    const noScore = avg(e.coachScores) === 0;
+    const noText = !e.coachFeedback || e.coachFeedback.trim() === '';
+    return noScore || noText;
+  }).sort((a,b) => new Date(b.weekStartDate) - new Date(a.weekStartDate));
+
+  let pendingHtml = '';
+  if (pendingFeedbacks.length > 0) {
+    pendingHtml = `<div class="alert-box">
+      <h4><i class="fa fa-bell"></i> 지도자 피드백 요망 (${pendingFeedbacks.length}건)</h4>
+      <div style="max-height:160px; overflow-y:auto;">
+        ${pendingFeedbacks.map(pf => `
+          <div class="alert-item" onclick="openPendingEntry('${pf.playerId}', '${esc(pf.playerName)}', '${pf.entryId}')">
+            <span><b>${pf.playerName}</b> · ${JOURNAL_TYPES[pf.type].title}</span>
+            <span>${pf.weekLabel||pf.weekStartDate} <i class="fa fa-arrow-right" style="margin-left:4px; opacity:0.5;"></i></span>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }
+
   const players = res.users.filter(u => u.role==='player');
   const thisMonday = dateStr(monday(new Date()));
   const types = Object.keys(JOURNAL_TYPES);
@@ -878,6 +885,7 @@ async function showDashboard(){
   }).join('');
 
   document.getElementById('dashboardCard').innerHTML = `
+    ${pendingHtml}
     <h2 style="margin:0 0 4px;">전체 대시보드</h2>
     <div style="font-size:11px; color:#64748b; margin-bottom:16px;">이번 주(${thisMonday}~) 기준 작성 현황</div>
     <div style="display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap;">
@@ -890,6 +898,268 @@ async function showDashboard(){
       <thead><tr style="background:var(--black); color:white;"><th style="padding:8px; text-align:left;">선수</th>${types.map(t=>`<th style="padding:8px;">${JOURNAL_TYPES[t].title}</th>`).join('')}</tr></thead>
       <tbody>${rows || `<tr><td colspan="${types.length+1}" style="text-align:center; color:#94a3b8; padding:20px;">등록된 선수가 없습니다.</td></tr>`}</tbody>
     </table></div>`;
+    byTypeCache = res; 
+}
+
+function openPendingEntry(playerId, playerName, entryId) {
+  document.getElementById('playerSelect').value = playerId;
+  onPlayerChange();
+  setTimeout(() => loadEntry(entryId), 100);
+}
+
+/* ---------- 📊 선수 심층 분석 (1:1 비교, 백분위, PDF) ---------- */
+function getQuarterFromDate(dateStr) {
+  const m = parseInt(dateStr.split('-')[1]);
+  if(m<=3) return 'q1'; if(m<=6) return 'q2'; if(m<=9) return 'q3'; return 'q4';
+}
+
+async function showAnalytics(){
+  hidePanels(); document.getElementById('analyticsWrapper').style.display = 'block';
+  document.getElementById('analyticsCard').innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">데이터를 불러오는 중...</div>';
+  
+  if(!byTypeCache) {
+    const res = await api({ action:'getAllData', requesterId: currentUser.id });
+    if (!res.ok) { document.getElementById('analyticsCard').innerHTML = `<div style="color:#ef4444;">${res.error}</div>`; return; }
+    byTypeCache = res;
+  }
+
+  const players = byTypeCache.users.filter(u => u.role==='player');
+  const types = Object.keys(JOURNAL_TYPES);
+
+  document.getElementById('analyticsCard').innerHTML = `
+    <h2 style="margin:0 0 14px;">📊 선수 심층 분석 (비교 및 리포트)</h2>
+    
+    <div class="analytics-controls" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:20px; background:#f8fafc; padding:14px; border-radius:8px; border:1px solid #cbd5e1;">
+      <select id="analyticsPlayer" onchange="renderAnalyticsCharts()" style="flex:1; min-width:140px; font-weight:bold; border-color:var(--red);">
+        <option value="">-- 기준 선수 선택 --</option>
+        ${players.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
+      </select>
+      <select id="analyticsComparePlayer" onchange="renderAnalyticsCharts()" style="flex:1; min-width:140px;">
+        <option value="">-- 비교 대상 선수 (선택) --</option>
+        ${players.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
+      </select>
+      <select id="analyticsType" onchange="renderAnalyticsCharts()" style="flex:1; min-width:130px;">
+        ${types.map(t=>`<option value="${t}">${JOURNAL_TYPES[t].title}</option>`).join('')}
+      </select>
+      <select id="analyticsPeriod" onchange="renderAnalyticsCharts()" style="flex:1; min-width:130px;">
+        <option value="all">전체 기간</option>
+        <option value="q1">1분기 (1~3월)</option>
+        <option value="q2">2분기 (4~6월)</option>
+        <option value="q3">3분기 (7~9월)</option>
+        <option value="q4">4분기 (10~12월)</option>
+      </select>
+    </div>
+
+    <div id="analyticsContent" style="display:none;">
+      <!-- 백분위 요약 박스 -->
+      <div id="analyticsSummary" style="background:#fff5f5; border:1px solid #fca5a5; border-radius:8px; padding:16px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div style="font-size:12px; color:var(--red); font-weight:bold;">해당 기간 종합 평가 (지도자 점수 기준)</div>
+          <div id="percentileText" style="font-size:18px; font-weight:900; margin-top:4px;">-</div>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">* 점수 데이터가 부족할 경우 순위의 의미가 불명확할 수 있습니다.</div>
+        </div>
+        <button class="btn btn-blue" onclick="generatePDFReport()" style="margin:0; width:auto; white-space:nowrap;"><i class="fa fa-file-pdf"></i> 분기별 리포트 PDF 다운로드</button>
+      </div>
+
+      <div class="charts-row" style="margin-top:0;">
+        <div class="chart-box" style="width:400px; max-width:100%;">
+          <h4>선수 강점/약점 밸런스</h4>
+          <div id="radarCaptureArea" style="background:white; padding:10px; border-radius:8px;"><canvas id="analyticsRadar"></canvas></div>
+        </div>
+        <div class="chart-box" style="width:500px; max-width:100%;">
+          <h4>주차별 성장 추이 (지도자 평가)</h4>
+          <div id="lineCaptureArea" style="background:white; padding:10px; border-radius:8px;"><canvas id="analyticsLine"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div id="analyticsEmpty" class="empty" style="color:#94a3b8; display:block;">기준 선수를 선택해주세요.</div>
+  `;
+}
+
+function renderAnalyticsCharts() {
+  const basePlayerId = document.getElementById('analyticsPlayer').value;
+  const comparePlayerId = document.getElementById('analyticsComparePlayer').value;
+  const type = document.getElementById('analyticsType').value;
+  const period = document.getElementById('analyticsPeriod').value;
+  
+  if (!basePlayerId) {
+    document.getElementById('analyticsContent').style.display = 'none';
+    document.getElementById('analyticsEmpty').style.display = 'block';
+    return;
+  }
+  
+  // 1. 기간(분기) 필터링 적용
+  const filteredEntries = byTypeCache.entries.filter(e => {
+    if(e.type !== type) return false;
+    if(period !== 'all' && getQuarterFromDate(e.weekStartDate) !== period) return false;
+    return true;
+  });
+
+  const baseEntries = filteredEntries.filter(e => e.playerId === basePlayerId).sort((a,b)=> new Date(a.weekStartDate)-new Date(b.weekStartDate));
+  const compareEntries = comparePlayerId ? filteredEntries.filter(e => e.playerId === comparePlayerId).sort((a,b)=> new Date(a.weekStartDate)-new Date(b.weekStartDate)) : [];
+  
+  if (baseEntries.length === 0) {
+    document.getElementById('analyticsContent').style.display = 'none';
+    document.getElementById('analyticsEmpty').innerText = '선택한 기간/유형에 해당하는 훈련 일지가 없습니다.';
+    document.getElementById('analyticsEmpty').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('analyticsContent').style.display = 'block';
+  document.getElementById('analyticsEmpty').style.display = 'none';
+
+  const cats = JOURNAL_TYPES[type].categories;
+  const baseName = document.getElementById('analyticsPlayer').options[document.getElementById('analyticsPlayer').selectedIndex].text;
+  const compareName = comparePlayerId ? document.getElementById('analyticsComparePlayer').options[document.getElementById('analyticsComparePlayer').selectedIndex].text : '';
+
+  // 2. 백분위 계산 (팀 내 순위)
+  let playerAverages = {};
+  filteredEntries.forEach(e => {
+    if(!playerAverages[e.playerId]) playerAverages[e.playerId] = { sum:0, count:0 };
+    const avgScore = avg(e.coachScores);
+    if(avgScore > 0) { playerAverages[e.playerId].sum += avgScore; playerAverages[e.playerId].count++; }
+  });
+  
+  let rankingList = Object.keys(playerAverages).map(pid => {
+    return { id: pid, avg: playerAverages[pid].count > 0 ? (playerAverages[pid].sum / playerAverages[pid].count) : 0 };
+  }).filter(p => p.avg > 0).sort((a,b) => b.avg - a.avg); // 내림차순 정렬
+
+  const totalPlayers = rankingList.length;
+  const myRankIdx = rankingList.findIndex(p => p.id === basePlayerId);
+  
+  let percentileStr = '';
+  let baseOverallAvg = 0;
+  if(myRankIdx !== -1) {
+    const myRank = myRankIdx + 1;
+    const percentile = Math.round((myRank / totalPlayers) * 100);
+    baseOverallAvg = Math.round(rankingList[myRankIdx].avg * 10) / 10;
+    percentileStr = `${baseName} 선수의 평균 점수는 <span style="color:var(--black);">${baseOverallAvg}점</span>으로, 팀 내 <span style="color:var(--red);">상위 ${percentile}%</span> (${totalPlayers}명 중 ${myRank}위) 수준입니다.`;
+  } else {
+    percentileStr = '지도자 평가 점수가 아직 입력되지 않았습니다.';
+  }
+  document.getElementById('percentileText').innerHTML = percentileStr;
+
+
+  // 3. 레이더 차트 계산
+  let baseCatSums = cats.map(()=>0), baseCatCounts = cats.map(()=>0);
+  let compCatSums = cats.map(()=>0), compCatCounts = cats.map(()=>0);
+  let teamCatSums = cats.map(()=>0), teamCatCounts = cats.map(()=>0);
+
+  baseEntries.forEach(e => { e.coachScores.forEach((score, i) => { if(score > 0) { baseCatSums[i] += score; baseCatCounts[i]++; } }); });
+  compareEntries.forEach(e => { e.coachScores.forEach((score, i) => { if(score > 0) { compCatSums[i] += score; compCatCounts[i]++; } }); });
+  filteredEntries.forEach(e => { e.coachScores.forEach((score, i) => { if(score > 0) { teamCatSums[i] += score; teamCatCounts[i]++; } }); });
+
+  const baseCatAvgs = baseCatSums.map((sum, i) => baseCatCounts[i] ? Math.round(sum/baseCatCounts[i]*10)/10 : 0);
+  const compCatAvgs = compCatSums.map((sum, i) => compCatCounts[i] ? Math.round(sum/compCatCounts[i]*10)/10 : 0);
+  const teamCatAvgs = teamCatSums.map((sum, i) => teamCatCounts[i] ? Math.round(sum/teamCatCounts[i]*10)/10 : 0);
+
+  let radarDatasets = [
+    { label: `${baseName} (기준)`, data: baseCatAvgs, backgroundColor: 'rgba(227,6,19,0.3)', borderColor: '#E30613', pointBackgroundColor: '#E30613' },
+    { label: '팀 전체 평균', data: teamCatAvgs, backgroundColor: 'transparent', borderColor: '#94a3b8', borderDash: [5,5], pointBackgroundColor: '#94a3b8' }
+  ];
+  if(comparePlayerId) {
+    radarDatasets.push({ label: `${compareName} (비교)`, data: compCatAvgs, backgroundColor: 'rgba(2,132,199,0.2)', borderColor: '#0284c7', pointBackgroundColor: '#0284c7' });
+  }
+
+  if(analyticsRadarChart) analyticsRadarChart.destroy();
+  analyticsRadarChart = new Chart(document.getElementById('analyticsRadar'), {
+    type: 'radar',
+    data: { labels: cats, datasets: radarDatasets },
+    options: { responsive: true, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1 } } } }
+  });
+
+  // 4. 꺾은선 차트 계산 (기준선수 vs 비교선수)
+  // X축 라벨 통합을 위해 날짜들을 모아서 정렬
+  let allDates = new Set();
+  baseEntries.forEach(e => allDates.add(e.weekStartDate));
+  compareEntries.forEach(e => allDates.add(e.weekStartDate));
+  const sortedDates = Array.from(allDates).sort((a,b) => new Date(a) - new Date(b));
+
+  const baseLineData = sortedDates.map(d => { const e = baseEntries.find(x => x.weekStartDate===d); return e ? avg(e.coachScores) : null; });
+  const compLineData = sortedDates.map(d => { const e = compareEntries.find(x => x.weekStartDate===d); return e ? avg(e.coachScores) : null; });
+  const pLineData = sortedDates.map(d => { const e = baseEntries.find(x => x.weekStartDate===d); return e ? avg(e.playerScores) : null; });
+
+  let lineDatasets = [
+    { label: `${baseName} (지도자 평가)`, data: baseLineData, borderColor: '#E30613', backgroundColor: '#E30613', tension: 0.2, spanGaps: true },
+    { label: `${baseName} (선수 자가평가)`, data: pLineData, borderColor: '#fca5a5', backgroundColor: '#fca5a5', borderDash: [3,3], tension: 0.2, spanGaps: true }
+  ];
+  if(comparePlayerId) {
+    lineDatasets.push({ label: `${compareName} (지도자 평가)`, data: compLineData, borderColor: '#0284c7', backgroundColor: '#0284c7', tension: 0.2, spanGaps: true });
+  }
+
+  if(analyticsLineChart) analyticsLineChart.destroy();
+  analyticsLineChart = new Chart(document.getElementById('analyticsLine'), {
+    type: 'line',
+    data: { labels: sortedDates, datasets: lineDatasets },
+    options: { responsive: true, scales: { y: { min: 0, max: 5 } } }
+  });
+
+  // 리포트 생성용 데이터 임시 보관
+  reportData = { baseName, typeTitle: JOURNAL_TYPES[type].title, periodName: document.getElementById('analyticsPeriod').options[document.getElementById('analyticsPeriod').selectedIndex].text, baseOverallAvg, percentileStr, latestFeedbacks: baseEntries.slice(-3).map(e => ({ week: e.weekLabel||e.weekStartDate, text: e.coachFeedback })) };
+}
+
+/* ---------- 📄 학부모 상담용 리포트 (PDF) 생성 기능 ---------- */
+async function generatePDFReport() {
+  if(!reportData) return;
+  loading(true);
+  
+  try {
+    const { jsPDF } = window.jspdf;
+    
+    // 1. 차트를 이미지로 변환 (html2canvas)
+    const radarCanvas = await html2canvas(document.getElementById('radarCaptureArea'), { scale: 2, backgroundColor: '#ffffff' });
+    const lineCanvas = await html2canvas(document.getElementById('lineCaptureArea'), { scale: 2, backgroundColor: '#ffffff' });
+    
+    // 2. 숨겨진 리포트 HTML DOM 구성
+    const container = document.getElementById('pdfReportContainer');
+    let feedbacksHtml = reportData.latestFeedbacks.filter(f=>f.text).map(f => `<div style="margin-bottom:10px;"><b>[${f.week}]</b><br>${esc(f.text)}</div>`).join('');
+    if(!feedbacksHtml) feedbacksHtml = '<div style="color:#94a3b8;">최근 피드백이 없습니다.</div>';
+
+    container.innerHTML = `
+      <div class="pdf-header">
+        <h1>FC SEOUL 선수 종합 리포트</h1>
+        <p>${reportData.typeTitle} / ${reportData.periodName} 기준</p>
+      </div>
+      <div style="font-size:16px; font-weight:bold; margin-bottom:10px;">선수 이름: ${reportData.baseName}</div>
+      <div class="pdf-box" style="margin-bottom:20px; font-size:14px; line-height:1.6;">
+        ${reportData.percentileStr}
+      </div>
+      <div class="pdf-row">
+        <div class="pdf-col pdf-box">
+          <h3>세부 항목별 밸런스</h3>
+          <img src="${radarCanvas.toDataURL('image/png')}" style="width:100%; max-width:300px; display:block; margin:0 auto;">
+        </div>
+        <div class="pdf-col pdf-box">
+          <h3>기간별 성장 추이</h3>
+          <img src="${lineCanvas.toDataURL('image/png')}" style="width:100%; max-width:350px; display:block; margin:0 auto;">
+        </div>
+      </div>
+      <div class="pdf-box">
+        <h3>최근 주요 지도자 피드백</h3>
+        <div style="font-size:12px; line-height:1.5;">${feedbacksHtml}</div>
+      </div>
+      <div style="text-align:right; font-size:10px; color:#94a3b8; margin-top:30px;">출력일: ${dateStr(new Date())}</div>
+    `;
+
+    // 3. 컨테이너 전체를 캡처하여 PDF로 저장
+    const reportCanvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff', width: 800 });
+    const imgData = reportCanvas.toDataURL('image/png');
+    
+    // A4 비율 계산
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (reportCanvas.height * pdfWidth) / reportCanvas.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`FC_SEOUL_리포트_${reportData.baseName}_${dateStr(new Date())}.pdf`);
+    
+    uiToast('PDF 다운로드가 완료되었습니다.');
+  } catch (err) {
+    console.error(err);
+    uiAlert('PDF 생성 중 오류가 발생했습니다: ' + err.message, '오류');
+  } finally {
+    loading(false);
+  }
 }
 
 /* ---------- 주기화별로 보기 ---------- */
@@ -953,7 +1223,7 @@ function openByTypeEntry(playerId, playerName, entryId){
   renderJournal();
 }
 
-/* ---------- 성장 추이 ---------- */
+/* ---------- 성장 추이 (선수용) ---------- */
 async function showGrowthChart(){
   if (!currentPlayerId) { await uiAlert('먼저 선수를 선택해주세요.'); return; }
   const res = await api({ action:'getAllData', requesterId: currentUser.id });
@@ -992,7 +1262,6 @@ function renderJournal(){
   let html = `<div class="j-title">${photo?`<img src="${photo}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;border:2px solid var(--gold);">`:''}${JOURNAL_TYPES[currentEntry.type].title} — ${currentEntry.playerName||''}</div>`;
   html += `<div class="j-meta">${currentEntry.weekLabel||''} · 시작일: ${currentEntry.weekStartDate}</div>`;
   
-  // table 태그에 data-label 속성을 넣어 모바일 반응형 처리 대응
   html += `<table class="j-table"><thead><tr><th>선수,지도자 (${currentEntry.weekLabel||''})</th>${cats.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
 
   DAYS.forEach(d => {
@@ -1004,8 +1273,8 @@ function renderJournal(){
     html += `</tr>`;
   });
 
-  html += `<tr class="score-row"><td data-label="구분">선수 자가평가</td>${cats.map((c,ci)=>`<td data-label="${c}">${tapHtml('player', ci, currentEntry.playerScores[ci]||0, !isPlayer)}</td>`).join('')}</tr>`;
-  html += `<tr class="score-row"><td data-label="구분">지도자 평가</td>${cats.map((c,ci)=>`<td data-label="${c}">${tapHtml('coach', ci, currentEntry.coachScores[ci]||0, !isCoach)}</td>`).join('')}</tr>`;
+  html += `<tr class="score-row"><td data-label="구분">선수 자가평가<div class="eval-helper">[시도 목적 기준]<br>10번 3점, 15번 3.5점<br>20번 4점, 25번 4.5점<br>30 이상 5점<br><br><span style="color:#ef4444;">*같은 점수 2번 누르면 0.5점</span></div></td>${cats.map((c,ci)=>`<td data-label="${c}">${tapHtml('player', ci, currentEntry.playerScores[ci]||0, !isPlayer)}</td>`).join('')}</tr>`;
+  html += `<tr class="score-row"><td data-label="구분">지도자 평가<div class="eval-helper"><span style="color:#ef4444;">*같은 점수 2번 누르면 0.5점</span></div></td>${cats.map((c,ci)=>`<td data-label="${c}">${tapHtml('coach', ci, currentEntry.coachScores[ci]||0, !isCoach)}</td>`).join('')}</tr>`;
 
   html += `<tr class="video-row"><td data-label="구분">영상 업로드</td>`;
   cats.forEach((c, ci) => {
@@ -1082,7 +1351,6 @@ function drawPies(cats){
   coachChart = new Chart(document.getElementById('coachPie'), { type:'pie', data:{ labels:cats, datasets:[{ data:cData, backgroundColor:PALETTE }] }, options:opts });
 }
 
-/* ---------- 저장 / 자동저장 / 내보내기 ---------- */
 async function saveEntry(){
   if (!currentEntry) return;
   const res = await api({ action:'saveEntry', entry: currentEntry, editedBy: currentUser.id });
