@@ -16,7 +16,6 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<!-- PDF 생성을 위한 jsPDF 라이브러리 추가 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -60,7 +59,6 @@ body{ margin:0; font-family:'Apple SD Gothic Neo', sans-serif; background:var(--
 .sidebar h3:first-child{ margin-top:0; }
 .sidebar select, .sidebar input{ width:100%; height:40px; padding:9px 10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; font-size:12.5px; box-sizing: border-box; }
 .sidebar textarea { width:100%; padding:9px 10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; font-size:12.5px; box-sizing: border-box; }
-/* 모바일 Date Input 잘림 방지 및 스타일 최적화 */
 .sidebar input[type="date"] { min-height: 40px; -webkit-appearance: none; appearance: none; background-color: #fff; }
 
 .mode-toggle{ display:flex; gap:6px; margin-bottom:14px; }
@@ -109,10 +107,24 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 .actions-row button{ padding:8px 16px; border:none; border-radius:5px; font-size:12px; font-weight:bold; cursor:pointer; color:white; transition: opacity 0.2s;}
 .actions-row button:hover{ opacity: 0.9; }
 
-#diaryViewCard{ max-width:600px; border-top:10px solid var(--red); box-shadow:0 10px 30px rgba(0,0,0,.3); }
-#diaryViewCard img{ width:100%; border-radius:6px; margin-bottom:12px; }
-.diary-item{ display:flex; align-items:center; gap:8px; padding:6px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:6px; cursor:pointer; font-size:11px; transition: background 0.2s;}
-.diary-item img{ width:38px; height:38px; object-fit:cover; border-radius:4px; }
+/* 📷 포토 일지(Calendar) 전용 CSS */
+#diaryViewCard{ max-width:800px; width:100%; padding:24px; border-top:10px solid var(--red); box-shadow:0 10px 30px rgba(0,0,0,.3); margin:0 auto; background:white; border-radius:8px;}
+.cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; font-weight:900; font-size:20px; }
+.cal-header button { border:none; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; font-size:16px; padding:8px 14px; transition:all 0.2s;}
+.cal-header button:hover { background:var(--red); color:white; border-color:var(--red); }
+.cal-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; text-align:center; margin-bottom: 24px;}
+.cal-day-name { font-size:12px; color:#64748b; font-weight:bold; padding-bottom:8px; border-bottom:2px solid #e2e8f0; margin-bottom:8px;}
+.cal-cell { aspect-ratio: 1; border:1px solid #e2e8f0; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:8px; cursor:pointer; font-size:14px; font-weight:bold; position:relative; transition:background 0.2s;}
+.cal-cell:hover { background:#f1f5f9; }
+.cal-cell.has-entry { border-color:var(--red); color:var(--red); background:#fff5f5; }
+.cal-dot { width:8px; height:8px; background:var(--red); border-radius:50%; margin-top:6px; box-shadow:0 2px 4px rgba(227,6,19,0.4); }
+.cal-cell.empty { border:none; cursor:default; background:transparent; }
+.cal-cell.empty:hover { background:transparent; }
+.diary-large-view { border-top: 2px dashed #cbd5e1; padding-top: 24px; }
+.diary-large-view img { width: 100%; max-height: 60vh; object-fit: contain; border-radius: 8px; background: #f8fafc; border:1px solid #e2e8f0; }
+
+.diary-item{ display:flex; align-items:center; gap:8px; padding:8px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:6px; cursor:pointer; font-size:12px; font-weight:bold; transition: background 0.2s;}
+.diary-item img{ width:42px; height:42px; object-fit:cover; border-radius:4px; }
 .diary-item:hover{ background:#f8fafc; }
 
 #growthModal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:500; align-items:center; justify-content:center; }
@@ -121,7 +133,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 #loadingOverlay{ position:fixed; inset:0; background:rgba(0,0,0,.25); z-index:9999; display:none; align-items:center; justify-content:center; }
 #loadingOverlay .box{ background:white; padding:16px 24px; border-radius:8px; border-top:6px solid var(--red); font-size:13px; font-weight:bold; box-shadow:0 10px 30px rgba(0,0,0,.2); }
 
-/* Custom UI Modal */
 #uiModalOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:10000; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(2px); }
 .ui-modal { background:white; width:340px; max-width:100%; border-radius:10px; overflow:hidden; box-shadow:0 15px 50px rgba(0,0,0,.4); border-top:6px solid var(--red); transform: translateY(-20px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
 .ui-modal.show { transform: translateY(0); opacity: 1; }
@@ -130,7 +141,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 .ui-modal-footer { padding:12px 20px; background:#f8fafc; display:flex; justify-content:flex-end; gap:8px; border-top:1px solid #e2e8f0; }
 .ui-modal-footer button { margin:0; padding:8px 16px; font-size:12.5px; border-radius: 6px; }
 
-/* Custom Toast Notification */
 #uiToast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(50px); background:#16a34a; color:white; padding:12px 24px; border-radius:30px; font-size:13px; font-weight:bold; z-index:9999; opacity:0; transition:all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow:0 5px 15px rgba(0,0,0,0.2); pointer-events:none; display: flex; align-items: center; gap: 8px; }
 #uiToast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
@@ -139,13 +149,9 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 .alert-item { font-size: 11.5px; color: #4c0519; padding: 6px; background: white; border-radius: 4px; margin-bottom: 4px; border: 1px solid #fecdd3; display: flex; justify-content: space-between; cursor: pointer; transition: background 0.2s; }
 .alert-item:hover { background: #ffe4e6; }
 
-/* PDF Report Hidden Container Style */
-#pdfReportContainer {
-  position: absolute; top: -9999px; left: -9999px; width: 800px; background: white; padding: 40px; color: black;
-}
+#pdfReportContainer { position: absolute; top: -9999px; left: -9999px; width: 800px; background: white; padding: 40px; color: black; }
 .pdf-header { text-align: center; border-bottom: 4px solid var(--red); padding-bottom: 10px; margin-bottom: 20px; }
 .pdf-header h1 { margin: 0; font-size: 24px; font-weight: 900; }
-/* Analytics Tabs */
 .analytics-tabs { display: flex; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
 .analytics-tabs button { flex: 1; padding: 12px; font-size: 14px; font-weight: bold; border: none; background: transparent; cursor: pointer; color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
 .analytics-tabs button:hover { color: var(--black); }
@@ -157,44 +163,54 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   #journalCard{ position:absolute; top:0; left:0; width:100%; box-shadow:none; }
 }
 
-/* 모바일 반응형 카드 레이아웃 */
+/* ★ 모바일 반응형 카드 완벽 해결 CSS ★ */
 @media (max-width: 820px){
   .layout{ flex-direction:column; min-height:auto; }
   .sidebar{ width:100%; min-width:auto; border-right:none; border-bottom:4px solid var(--red); max-height:60vh; overflow-y:auto; }
-  .main{ padding:12px; }
-  #journalCard{ width:100%; padding:16px 14px; border-top-width:10px; }
+  
+  /* 메인 영역 및 테이블 요소 가로폭 100% 강제 확정 */
+  .main{ padding:12px; width:100%; box-sizing: border-box; }
+  #journalCard{ width:100%; padding:16px 14px; border-top-width:10px; box-sizing: border-box; }
   .j-title{ font-size:18px; line-height: 1.3; margin-bottom: 18px; }
   
+  table.j-table { display: block; width: 100%; border: none; box-sizing: border-box; }
   table.j-table thead { display: none; }
-  tr.goal-row td:first-child { 
-    background: var(--black); color: white; font-size: 14px; padding: 12px 14px; text-align: left; border-bottom: none;
+  table.j-table tbody { display: block; width: 100%; box-sizing: border-box; }
+  table.j-table tr { display: block; width: 100%; margin-bottom: 18px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.06); box-sizing: border-box; }
+  table.j-table td { display: block; width: 100%; border: none; border-bottom: 1px solid #e2e8f0; padding: 14px; position: relative; background: white; box-sizing: border-box; }
+  table.j-table td:last-child { border-bottom: none; }
+  
+  table.j-table td::before { 
+    content: attr(data-label); display: block; font-weight: 900; font-size: 12.5px; color: #0f172a; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px;
   }
-  tr.score-row td:first-child, tr.video-row td:first-child { 
-    background: var(--black); color: white; font-size: 14px; padding: 12px 14px; text-align: left; border-bottom: none;
+  
+  /* 아코디언 헤더 폭 100% 보장 및 정렬 */
+  tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-child { 
+    display: flex !important; width: 100%; justify-content: space-between; align-items: center;
+    background: var(--black); color: white; font-size: 14px; padding: 14px; border-bottom: none; box-sizing: border-box;
   }
   tr.goal-row td:first-child::before, tr.score-row td:first-child::before, tr.video-row td:first-child::before { display: none; }
   
-  /* 모바일 개인 목적 아코디언(접기/펴기) 스타일 */
-  .acc-icon { display: inline-block; transition: transform 0.2s; font-size: 12px; }
-  tr.goal-row td:first-child { cursor: pointer; display: flex !important; justify-content: space-between; align-items: center; }
-  tr.goal-row td.goal-cell { display: none; } /* 기본적으로 숨김 */
-  tr.goal-row.acc-expanded td.goal-cell { display: block; } /* 터치 시 표시 */
+  /* 모바일 아코디언(접기/펴기) 작동 CSS */
+  .acc-icon { display: inline-block; transition: transform 0.2s; font-size: 14px; padding-left:10px; }
+  tr.goal-row td:first-child { cursor: pointer; }
+  tr.goal-row td.goal-cell { display: none; } /* 내용 숨김 */
+  tr.goal-row.acc-expanded td.goal-cell { display: block; } /* 내용 펴짐 */
   tr.goal-row.acc-expanded td:first-child .acc-icon { transform: rotate(180deg); }
 
   .eval-helper { color: #cbd5e1; }
   .eval-helper span { color: #fca5a5 !important; }
   
-  .goal-cell textarea { min-height: 50px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #f8fafc; font-size: 13px; margin-top: 4px; }
+  .goal-cell textarea { min-height: 50px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #f8fafc; font-size: 13px; margin-top: 4px; width: 100%; box-sizing: border-box;}
   .tap-row { justify-content: flex-start; gap: 6px; }
   .tap-btn { width: 34px; height: 34px; font-size: 14px; }
   .tap-val { font-size: 15px; margin-left: 10px; }
-  .video-cell input { padding: 8px; font-size: 12px; margin-bottom: 6px; }
+  .video-cell input { padding: 8px; font-size: 12px; margin-bottom: 6px; width: 100%; box-sizing: border-box;}
   .video-cell button { padding: 8px; font-size: 11px; }
 
-  .chart-box{ width:100%; margin-bottom: 24px; }
-  .card{ padding:14px; }
+  .chart-box{ width:100%; margin-bottom: 24px; box-sizing: border-box;}
+  .card{ padding:14px; box-sizing: border-box;}
 
-  /* Analytics Mobile Fixes */
   .analytics-controls { flex-direction: column; align-items: stretch !important; }
   .analytics-controls select { width: 100%; margin-bottom: 8px; }
 }
@@ -287,7 +303,7 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
         <div class="actions-row" id="journalActionsRow"></div>
         <div id="journalCard"></div>
       </div>
-      <div id="diaryViewWrapper" style="display:none;"><div id="diaryViewCard" class="card"></div></div>
+      <div id="diaryViewWrapper" style="display:none;"><div id="diaryViewCard"></div></div>
       <div class="empty" id="emptyMsg">왼쪽에서 메뉴를 선택해보세요.</div>
     </div>
   </div>
@@ -344,6 +360,7 @@ let playerChart, coachChart, growthChart, autoSaveTimer;
 let analyticsRadarChart, analyticsLineChart;
 let reportData = null; // PDF 출력용 임시 데이터 보관
 let analyticsMode = 'player'; // 'player' or 'week'
+let calDate = new Date(); // 달력 현재 페이지 추적용
 
 /* ---------- 커스텀 UI 함수 ---------- */
 function uiAlert(msg, title='알림') {
@@ -563,7 +580,12 @@ function enterApp(){
   if (currentUser.role !== 'player' && currentUser.role !== 'coach') { showPendingScreen(); return; }
   document.getElementById('userLabel').innerText = `${currentUser.name} (${currentUser.role==='player'?'선수':'지도자'}${currentUser.isAdmin?' · 관리자':''})`;
   if (currentUser.role === 'player') { currentPlayerId = currentUser.id; currentPlayerName = currentUser.name; renderPlayerSidebar(); }
-  else renderCoachSidebar();
+  else { 
+    // 지도자용 진입 처리
+    renderCoachSidebar(); 
+    // 처음에 자동으로 전체 대시보드를 보여줍니다.
+    showDashboard(); 
+  }
 }
 
 function showPendingScreen(){
@@ -606,19 +628,29 @@ function switchMode(mode){
   else renderCycleBody();
 }
 function renderCycleBody(){
-  document.getElementById('sidebarBody').innerHTML = `
-    <h3>일지 유형</h3>${typeSelectHtml()}
-    <h3>새 주차 작성</h3>
-    <label style="font-size:11px; color:#64748b;">주차 시작일 (월요일)</label>
-    <input type="date" id="newWeekDate">
-    <label style="font-size:11px; color:#64748b;">주차 라벨</label>
-    <input type="text" id="newWeekLabel" value="1주차">
-    <button class="btn btn-red" onclick="createEntry()">새 일지 시작하기</button>
-    <button class="btn btn-outline" onclick="showGrowthChart()"><i class="fa fa-chart-line"></i> 성장 추이 보기</button>
-    <hr style="margin: 18px 0 10px; border:0; border-top: 1px dashed #cbd5e1;">
-    <h3 style="margin-top:0;">내 일지 목록</h3>
-    <p style="font-size:11px; color:#94a3b8; margin-top:-5px; margin-bottom:12px;">작성된 일지를 클릭하여 매일 목표를 수정하세요.</p>
-    <div id="archiveList">불러오는 중...</div>`;
+  // 지도자인 경우 입력 폼 숨기기 처리
+  if (currentUser.role === 'coach') {
+    document.getElementById('sidebarBody').innerHTML = `
+      <h3>일지 유형</h3>${typeSelectHtml()}
+      <hr style="margin: 18px 0 10px; border:0; border-top: 1px dashed #cbd5e1;">
+      <h3 style="margin-top:0;">${currentPlayerName} 일지 목록</h3>
+      <div id="archiveList">불러오는 중...</div>`;
+  } else {
+    // 선수용 UI
+    document.getElementById('sidebarBody').innerHTML = `
+      <h3>일지 유형</h3>${typeSelectHtml()}
+      <h3>새 주차 작성</h3>
+      <label style="font-size:11px; color:#64748b;">주차 시작일 (월요일)</label>
+      <input type="date" id="newWeekDate">
+      <label style="font-size:11px; color:#64748b;">주차 라벨</label>
+      <input type="text" id="newWeekLabel" value="1주차">
+      <button class="btn btn-red" onclick="createEntry()">새 일지 시작하기</button>
+      <button class="btn btn-outline" onclick="showGrowthChart()"><i class="fa fa-chart-line"></i> 성장 추이 보기</button>
+      <hr style="margin: 18px 0 10px; border:0; border-top: 1px dashed #cbd5e1;">
+      <h3 style="margin-top:0;">내 일지 목록</h3>
+      <p style="font-size:11px; color:#94a3b8; margin-top:-5px; margin-bottom:12px;">작성된 일지를 클릭하여 매일 목표를 수정하세요.</p>
+      <div id="archiveList">불러오는 중...</div>`;
+  }
   document.getElementById('typeSelect').value = currentType;
   loadArchive();
 }
@@ -688,7 +720,7 @@ function loadEntry(entryId){
   });
 }
 
-/* ---------- 선수 포토 일지 ---------- */
+/* ---------- 선수 포토 일지 (달력형 뷰) ---------- */
 function renderDiaryBody(){
   document.getElementById('sidebarBody').innerHTML = `
     <h3>새 일지 사진</h3>
@@ -704,16 +736,88 @@ function renderDiaryBody(){
     <label style="font-size:11px; color:#64748b;">메모 (선택)</label>
     <textarea id="diaryMemo" rows="2"></textarea>
     <button class="btn btn-red" onclick="saveDiary()">일지 저장</button>
-    <h3>내 일지 사진 목록</h3><div id="diaryList">불러오는 중...</div>`;
+    <hr style="margin: 18px 0 10px; border:0; border-top: 1px dashed #cbd5e1;">
+    <h3 style="margin-top:0;">최근 일지 (7일)</h3>
+    <div id="diaryList">불러오는 중...</div>`;
+  initCalendarView();
   loadDiaryList();
 }
 function renderCoachDiaryBody(){
   document.getElementById('sidebarBody').innerHTML = `
-    <h3>${currentPlayerName || ''} 일지 사진</h3>
-    <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">날짜를 선택하면 사진을 볼 수 있어요.</p>
+    <h3>최근 일지 (7일)</h3>
+    <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">우측 달력에서 날짜를 선택하여 전체 사진을 볼 수 있습니다.</p>
     <div id="diaryList">불러오는 중...</div>`;
+  initCalendarView();
   loadDiaryList();
 }
+
+function initCalendarView() {
+  hidePanels();
+  document.getElementById('diaryViewWrapper').style.display = 'block';
+  document.getElementById('diaryViewCard').innerHTML = `
+    <div class="cal-header">
+      <button onclick="changeCalMonth(-1)"><i class="fa fa-chevron-left"></i></button>
+      <span id="calTitle"></span>
+      <button onclick="changeCalMonth(1)"><i class="fa fa-chevron-right"></i></button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div id="calDetail" class="diary-large-view" style="display:none;"></div>
+  `;
+}
+
+function changeCalMonth(dir) {
+  calDate.setMonth(calDate.getMonth() + dir);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const y = calDate.getFullYear();
+  const m = calDate.getMonth();
+  const titleEl = document.getElementById('calTitle');
+  if(titleEl) titleEl.innerText = `${y}년 ${m+1}월`;
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+
+  let html = '';
+  const dayNames = ['일','월','화','수','목','금','토'];
+  dayNames.forEach(d => html += `<div class="cal-day-name">${d}</div>`);
+
+  for(let i=0; i<firstDay; i++) html += `<div class="cal-cell empty"></div>`;
+
+  for(let d=1; d<=daysInMonth; d++) {
+    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const entriesForDay = diaryListCache.filter(x => x.date === dateStr);
+    const hasEntry = entriesForDay.length > 0;
+    html += `<div class="cal-cell ${hasEntry?'has-entry':''}" onclick="${hasEntry ? `viewDiaryByDate('${dateStr}')` : ''}">
+      ${d}
+      ${hasEntry ? `<div class="cal-dot"></div>` : ''}
+    </div>`;
+  }
+  const grid = document.getElementById('calGrid');
+  if(grid) grid.innerHTML = html;
+}
+
+function viewDiaryByDate(dateStr) {
+  const entries = diaryListCache.filter(x => x.date === dateStr);
+  const detail = document.getElementById('calDetail');
+  if(entries.length === 0) {
+    detail.style.display = 'none';
+    return;
+  }
+  detail.style.display = 'block';
+  // 크게 보여주기 위해 렌더링
+  detail.innerHTML = entries.map(d => `
+    <div style="margin-bottom: 30px;">
+      <h3 style="margin:0 0 12px; font-size:18px;">${d.playerName || currentPlayerName} — ${d.date}</h3>
+      <img src="${d.photoUrl}">
+      ${d.memo ? `<p style="font-size:14px; white-space:pre-wrap; background:#f8fafc; padding:16px; border-radius:8px; margin-top:12px; border:1px solid #e2e8f0; line-height:1.5;">${esc(d.memo)}</p>` : ''}
+      ${currentUser.role === 'coach' ? `<button class="btn btn-outline" style="margin-top:12px; border-color:#ef4444; color:#ef4444; width:auto; padding:6px 16px;" onclick="deleteDiary('${d.diaryId}')"><i class="fa fa-trash"></i> 이 사진 삭제</button>` : ''}
+    </div>
+  `).join('');
+  detail.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
 function handleDiaryPhoto(e){
   const file = e.target.files[0]; if (!file) return;
   compressImage(file, 1400, 0.85, dataUrl => {
@@ -721,6 +825,7 @@ function handleDiaryPhoto(e){
     const prev = document.getElementById('diaryPreview'); prev.src = dataUrl; prev.style.display='block';
   });
 }
+
 async function saveDiary(){
   if (!pendingDiaryPhoto) { await uiAlert('사진을 먼저 촬영하거나 선택해주세요.'); return; }
   const date = document.getElementById('diaryDate').value;
@@ -734,35 +839,37 @@ async function saveDiary(){
     pendingDiaryPhoto = null;
     document.getElementById('diaryPreview').style.display = 'none';
     document.getElementById('diaryMemo').value = '';
-    loadDiaryList();
+    loadDiaryList(); // 리스트 갱신 (달력도 함께 갱신됨)
   } else await uiAlert('저장 실패: ' + res.error, '저장 실패');
 }
+
 async function loadDiaryList(){
   const el = document.getElementById('diaryList'); if (!el) return;
   const res = await api({ action:'listDiary', playerId: currentPlayerId });
   if (!res.ok) { el.innerHTML = '목록을 불러오지 못했습니다.'; return; }
-  diaryListCache = res.diary;
-  if (!res.diary.length) { el.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">작성된 일지 사진이 없습니다.</div>'; return; }
-  const canDel = currentUser.role === 'coach';
-  el.innerHTML = res.diary.map(d => `
-    <div class="diary-item" onclick="viewDiary('${d.diaryId}')">
+  
+  // 내림차순 정렬
+  diaryListCache = res.diary.sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  renderCalendar(); // 달력 점 찍기
+
+  const recent7 = diaryListCache.slice(0, 7); // 사이드바에는 최근 7개만
+  if (!recent7.length) { el.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">작성된 일지 사진이 없습니다.</div>'; return; }
+  
+  el.innerHTML = recent7.map(d => `
+    <div class="diary-item" onclick="viewDiaryByDate('${d.date}')">
       <img src="${d.photoUrl}"><span style="flex:1;">${d.date}</span>
-      ${canDel ? `<i class="fa fa-trash" style="color:#ef4444;" onclick="event.stopPropagation(); deleteDiary('${d.diaryId}')"></i>` : ''}
     </div>`).join('');
 }
-function viewDiary(diaryId){
-  const d = diaryListCache.find(x => x.diaryId === diaryId); if (!d) return;
-  hidePanels();
-  document.getElementById('diaryViewWrapper').style.display = 'block';
-  document.getElementById('diaryViewCard').innerHTML = `
-    <h3 style="margin:0 0 4px;">${d.playerName || currentPlayerName} — ${d.date}</h3>
-    <img src="${d.photoUrl}">
-    ${d.memo ? `<p style="font-size:13px; white-space:pre-wrap;">${esc(d.memo)}</p>` : ''}`;
-}
+
 async function deleteDiary(diaryId){
   if (!(await uiConfirm('이 사진을 영구 삭제하시겠습니까?', '사진 삭제'))) return;
   const res = await api({ action:'deleteDiary', diaryId, requesterId: currentUser.id });
-  if (res.ok) { loadDiaryList(); showEmpty(); uiToast('삭제되었습니다.'); } else await uiAlert(res.error, '삭제 오류');
+  if (res.ok) { 
+    uiToast('삭제되었습니다.'); 
+    await loadDiaryList();
+    document.getElementById('calDetail').style.display = 'none'; // 삭제 후 상세화면 닫기
+  } else await uiAlert(res.error, '삭제 오류');
 }
 
 /* ---------- 지도자 사이드바 (오류 수정 및 안정화) ---------- */
@@ -776,7 +883,7 @@ async function renderCoachSidebar() {
       <button class="btn btn-outline" onclick="showAnalytics()"><i class="fa fa-chart-pie"></i> 📊 심층 분석 대시보드</button>
       <button class="btn btn-outline" onclick="showByType()"><i class="fa fa-layer-group"></i> 주기화별로 보기</button>
       <hr style="margin: 18px 0; border:0; border-top: 1px dashed #cbd5e1;">
-      <h3 style="margin-top:0;">선수 선택 (작성/수정)</h3>
+      <h3 style="margin-top:0;">선수 선택 (조회/피드백)</h3>
       <div id="playerPickArea">목록을 불러오는 중입니다...</div>
     `;
     sb.innerHTML = baseHtml;
@@ -1606,5 +1713,4 @@ async function exportExcel(){
 </script>
 </body>
 </html>
-
 
