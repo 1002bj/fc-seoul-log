@@ -136,7 +136,7 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 #growthModal .box{ background:white; width:600px; max-width:92vw; border-radius:8px; border-top:8px solid var(--red); padding:20px; box-shadow:0 10px 40px rgba(0,0,0,0.3);}
 
 #loadingOverlay{ position:fixed; inset:0; background:rgba(0,0,0,.25); z-index:9999; display:none; align-items:center; justify-content:center; }
-#loadingOverlay .box{ background:white; padding:16px 24px; border-radius:8px; border-top:6px solid var(--red); font-size:13px; font-weight:bold; box-shadow:0 10px 30px rgba(0,0,0,.2); display:flex; align-items:center; }
+#loadingOverlay .box{ background:white; padding:16px 24px; border-radius:8px; border-top:6px solid var(--red); font-size:13px; font-weight:bold; box-shadow:0 10px 30px rgba(0,0,0,.2); display:flex; align-items:center; text-align:center; }
 
 /* Custom UI Modal */
 #uiModalOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:10000; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(2px); }
@@ -170,9 +170,9 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   #journalCard{ position:absolute; top:0; left:0; width:100%; box-shadow:none; }
 }
 
-/* ★ 모바일 반응형 가로 스크롤 & 아코디언 완전 정복 CSS ★ */
+/* ★ 모바일 반응형 가로 스크롤 & 아코디언 CSS ★ */
 @media (max-width: 820px){
-  .empty { display: none !important; } /* 모바일에서는 불필요한 빈화면 텍스트 숨김 */
+  .empty { display: none !important; }
   .layout{ flex-direction:column; min-height:auto; }
   .sidebar{ width:100%; min-width:auto; border-right:none; border-bottom:4px solid var(--red); max-height:60vh; overflow-y:auto; }
   
@@ -312,7 +312,7 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
     <div class="userinfo">
       <img id="userAvatar" src="" style="width:26px; height:26px; border-radius:50%; object-fit:cover; display:none;">
       <span id="userLabel"></span>
-      <button onclick="exportExcel()"><i class="fa fa-file-excel"></i> 엑셀 내보내기</button>
+      <button id="btnExportExcel" onclick="exportExcel()"><i class="fa fa-file-excel"></i> 엑셀 내보내기</button>
       <button onclick="logout()">로그아웃</button>
     </div>
   </div>
@@ -385,7 +385,7 @@ let playerChart, coachChart, growthChart, analyticsRadarChart, analyticsLineChar
 let reportData = null; 
 let analyticsMode = 'player'; 
 let calDate = new Date(); 
-let expandedAccordionDay = null; // 모바일 아코디언 상태 유지
+let expandedAccordionDay = null; 
 
 /* ---------- Custom UI 함수 ---------- */
 function uiAlert(msg, title='알림') {
@@ -488,7 +488,7 @@ function loading(on, customText = '서버와 통신 중...'){
     el = document.createElement('div'); el.id = 'loadingOverlay';
     document.body.appendChild(el);
   }
-  el.innerHTML = `<div class="box"><i class="fa fa-spinner fa-spin" style="color:var(--red); margin-right:8px;"></i>${customText}</div>`;
+  el.innerHTML = `<div class="box"><i class="fa fa-spinner fa-spin" style="color:var(--red); margin-right:8px;"></i><span style="line-height:1.5;">${customText}</span></div>`;
   el.style.display = on ? 'flex' : 'none';
 }
 
@@ -553,7 +553,6 @@ function setUser(user){
   enterApp();
 }
 
-// ✨ 로그아웃이나 화면 닫기 전에 저장되지 않은 데이터 강제 전송
 async function flushPendingSaves() {
   if (autoSaveTimer && currentEntry) {
     clearTimeout(autoSaveTimer);
@@ -626,10 +625,14 @@ function enterApp(){
   if (currentUser.photo) { av.src = currentUser.photo; av.style.display = 'inline-block'; } else av.style.display = 'none';
   if (currentUser.role !== 'player' && currentUser.role !== 'coach') { showPendingScreen(); return; }
   document.getElementById('userLabel').innerText = `${currentUser.name} (${currentUser.role==='player'?'선수':'지도자'}${currentUser.isAdmin?' · 관리자':''})`;
+  
+  const btnExport = document.getElementById('btnExportExcel');
   if (currentUser.role === 'player') { 
+    btnExport.style.display = 'none'; // 선수 계정에서 엑셀 내보내기 버튼 삭제
     currentPlayerId = currentUser.id; currentPlayerName = currentUser.name; 
     renderPlayerSidebar(); 
   } else { 
+    btnExport.style.display = 'inline-block'; // 지도자는 노출
     renderCoachSidebar(); 
     showDashboard(); 
   }
@@ -667,7 +670,7 @@ function renderPlayerSidebar(){
   switchMode(sidebarMode);
 }
 async function switchMode(mode){
-  await flushPendingSaves(); // ✨ 다른 메뉴 탭을 누르면 미저장 데이터 즉시 서버 동기화
+  await flushPendingSaves(); 
   sidebarMode = mode;
   const btnCycle = document.getElementById('modeCycle');
   const btnDiary = document.getElementById('modeDiary');
@@ -1126,7 +1129,7 @@ async function deletePlayerAccount(targetId, name){
 }
 
 async function onPlayerChange(){
-  await flushPendingSaves(); // ✨ 다른 선수로 넘어가기 전 강제 동기화
+  await flushPendingSaves(); 
   const sel = document.getElementById('playerSelect');
   currentPlayerId = sel.value; currentPlayerName = sel.options[sel.selectedIndex].text;
   currentEntry = null; showEmpty();
@@ -1142,7 +1145,7 @@ async function onPlayerChange(){
 
 /* ---------- 전체 대시보드 ---------- */
 async function showDashboard(){
-  await flushPendingSaves(); // ✨ 대시보드 진입 전 강제 동기화 (레이스 컨디션 해결)
+  await flushPendingSaves(); 
 
   hidePanels(); document.getElementById('dashboardWrapper').style.display = 'block';
   document.getElementById('dashboardCard').innerHTML = '<div style="text-align:center; padding: 40px; color:#64748b;"><i class="fa fa-spinner fa-spin fa-2x" style="margin-bottom:16px;"></i><br><b style="color:var(--black);">전체 주기화 및 포토 일지 데이터를 분석 중입니다...</b></div>';
@@ -1202,12 +1205,10 @@ async function showDashboard(){
 
     let diaryCell = '';
     if (!latestDiary) {
-      // 진짜로 한 번도 안 쓴 사람만 클릭 불가 미작성
       diaryCell = `<td class="dash-cell" style="text-align:center; color:#cbd5e1; padding:8px; border:1px solid #e2e8f0;" onclick="uiToast('작성된 포토 일지가 없습니다.','info')">미작성</td>`;
     } else {
       const recentDiariesThisWeek = pDiaries.filter(d => d.date >= thisMonday);
       const doneThisWeek = recentDiariesThisWeek.length > 0;
-      // 옛날에라도 썼으면 그 날짜(latestDiary.date)를 보여주고 거기로 연결!
       diaryCell = `<td class="dash-cell" style="text-align:center; padding:8px; border:1px solid #e2e8f0; background:${doneThisWeek?'#f0fdf4':'white'};" onclick="openDashboardDiary('${p.id}', '${esc(p.name)}', '${latestDiary.date}')">
         <div style="font-size:10px; color:${doneThisWeek?'#16a34a':'#ef4444'}; font-weight:bold;">${doneThisWeek ? `✔ 이번주 ${recentDiariesThisWeek.length}건` : `⚠ 최근: ${latestDiary.date}`}</div>
       </td>`;
@@ -1282,7 +1283,7 @@ function setAnalyticsMode(mode) {
 }
 
 async function showAnalytics(){
-  await flushPendingSaves(); // ✨ 동기화
+  await flushPendingSaves(); 
   hidePanels(); document.getElementById('analyticsWrapper').style.display = 'block';
   document.getElementById('analyticsCard').innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">데이터를 불러오는 중...</div>';
   
@@ -1546,7 +1547,7 @@ function renderWeekAnalytics() {
   }, 50);
 }
 
-/* ---------- PDF Kuatia (PDF Report) ---------- */
+/* ---------- 📄 학부모 상담용 리포트 (PDF) ---------- */
 async function generatePDFReport() {
   if(!reportData) return;
   loading(true, 'PDF 리포트를 생성하는 중입니다...');
@@ -1594,7 +1595,7 @@ async function generatePDFReport() {
 
 /* ---------- 주기화별로 보기 ---------- */
 async function showByType(){
-  await flushPendingSaves(); // ✨ 동기화
+  await flushPendingSaves(); 
   hidePanels(); document.getElementById('byTypeWrapper').style.display = 'block';
   document.getElementById('byTypeCard').innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">불러오는 중...</div>';
   const res = await api({ action:'getAllData', requesterId: currentUser.id });
@@ -1789,7 +1790,7 @@ function scheduleAutoSave(){
   if (!currentEntry) return;
   clearTimeout(autoSaveTimer);
   autoSaveTimer = setTimeout(async () => {
-    autoSaveTimer = null; // 실행 시 초기화
+    autoSaveTimer = null; 
     const res = await api({ action:'saveEntry', entry: currentEntry, editedBy: currentUser.id }, true);
     if (res.ok) { currentEntry.entryId = res.entryId; uiToast('자동저장되었습니다.'); }
   }, 2000);
@@ -1806,19 +1807,92 @@ async function exportPNG(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
+/* 📊 엑셀 내보내기 완벽 고도화 (4개 시트 분할 출력) */
 async function exportExcel(){
-  const res = await api({ action:'getAllData', requesterId: currentUser.id });
-  if (!res.ok) { await uiAlert(res.error, '오류'); return; }
+  loading(true, '전체 데이터를 수집 중입니다.<br>시간이 다소 소요될 수 있습니다...');
+  const res = await api({ action:'getAllData', requesterId: currentUser.id }, true);
+  if (!res.ok) { loading(false); await uiAlert(res.error, '오류'); return; }
+
+  const players = res.users.filter(u => u.role === 'player');
+
+  // 모든 선수의 포토 일지 병렬 수집
+  let allDiaries = [];
+  const diariesPromises = players.map(p => api({ action: 'listDiary', playerId: p.id }, true));
+  const diariesResponses = await Promise.all(diariesPromises);
+  players.forEach((p, idx) => {
+    if (diariesResponses[idx].ok) {
+      const dList = diariesResponses[idx].diary.map(d => ({ ...d, playerName: p.name }));
+      allDiaries = allDiaries.concat(dList);
+    }
+  });
+
+  // [시트 1] 주기화 요약본
   const summary = res.entries.map(e => ({
-    선수: e.playerName, 유형: (JOURNAL_TYPES[e.type]||{}).title || e.type, 주차: e.weekLabel, 시작일: e.weekStartDate,
-    선수평균: avg(e.playerScores), 지도자평균: avg(e.coachScores), 선수의견: e.playerComment||'', 지도자피드백: e.coachFeedback||'', 수정일: e.updatedAt
+    '선수명': e.playerName,
+    '훈련 유형': (JOURNAL_TYPES[e.type]||{}).title || e.type,
+    '주차 라벨': e.weekLabel,
+    '시작일': e.weekStartDate,
+    '자가평가(평균)': avg(e.playerScores),
+    '지도자평가(평균)': avg(e.coachScores),
+    '선수 의견': e.playerComment || '',
+    '지도자 피드백': e.coachFeedback || '',
+    '업데이트 일시': e.updatedAt
   }));
-  const users = res.users.map(u => ({ 아이디:u.id, 이름:u.name, 역할:u.role==='player'?'선수':'지도자', 전체조회권한:u.granted?'O':'X' }));
+
+  // [시트 2] 주기화 세부 데이터 (모든 점수, 요일별 목표 전부 펼치기)
+  const detailed = res.entries.map(e => {
+    const cats = (JOURNAL_TYPES[e.type]||{}).categories || ['1','2','3','4','5'];
+    let row = {
+      '선수명': e.playerName,
+      '훈련 유형': (JOURNAL_TYPES[e.type]||{}).title || e.type,
+      '주차 라벨': e.weekLabel,
+      '시작일': e.weekStartDate
+    };
+    
+    // 점수
+    cats.forEach((c, i) => { row[`[자가평가] ${c}`] = e.playerScores ? e.playerScores[i] || 0 : 0; });
+    cats.forEach((c, i) => { row[`[지도자평가] ${c}`] = e.coachScores ? e.coachScores[i] || 0 : 0; });
+    
+    // 요일별 목표
+    DAYS.forEach(day => {
+      cats.forEach((c, i) => {
+        row[`[${day} 목적] ${c}`] = e.goals && e.goals[day] ? e.goals[day][i] || '' : '';
+      });
+    });
+    
+    // 영상 링크
+    cats.forEach((c, i) => { row[`[영상] ${c}`] = e.videos && e.videos[i] ? e.videos[i].url || '' : ''; });
+    
+    return row;
+  });
+
+  // [시트 3] 포토 일지 전체
+  const diarySheetData = allDiaries.map(d => ({
+    '선수명': d.playerName,
+    '작성 날짜': d.date,
+    '메모 내용': d.memo || '',
+    '사진 URL': d.photoUrl || '',
+    '시스템 등록일시': d.createdAt || ''
+  }));
+
+  // [시트 4] 사용자 목록
+  const users = res.users.map(u => ({
+    '이름': u.name,
+    '아이디(이메일)': u.id,
+    '계정 역할': u.role === 'player' ? '선수' : '지도자',
+    '전체조회 권한': u.granted ? 'O' : 'X',
+    '관리자 여부': u.isAdmin ? 'O' : 'X'
+  }));
+
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), "일지요약");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(users), "사용자");
-  XLSX.writeFile(wb, `FC_SEOUL_훈련일지_백업_${dateStr(new Date())}.xlsx`);
-  uiToast('엑셀 파일이 다운로드되었습니다.');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), "주기화 요약");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detailed), "주기화 세부 데이터(전체)");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(diarySheetData), "포토 일지 통합");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(users), "사용자 목록");
+
+  XLSX.writeFile(wb, `FC_SEOUL_전체데이터_백업_${dateStr(new Date())}.xlsx`);
+  loading(false);
+  uiToast('엑셀 파일(전체 통합본)이 다운로드되었습니다.');
 }
 </script>
 </body>
