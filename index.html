@@ -72,15 +72,19 @@ body{ margin:0; font-family:'Apple SD Gothic Neo', sans-serif; background:var(--
 .perm-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #eee; font-size:12px; }
 .perm-row button{ font-size:10.5px; padding:4px 8px; border-radius:4px; border:none; cursor:pointer; color:white; }
 
+/* PC 환경 배경 하얀색 고정 */
 .card{ background:white; border-radius:8px; padding:20px; max-width:1000px; margin:0 auto; }
-#journalCard{ width:1050px; max-width:100%; padding:30px 35px; border-top:15px solid var(--red); box-shadow:0 10px 30px rgba(0,0,0,.3); }
-.j-title{ text-align:center; font-size:20px; font-weight:900; margin-bottom:14px; }
+#journalCard{ width:1050px; max-width:100%; padding:30px 35px; border-top:15px solid var(--red); box-shadow:0 10px 30px rgba(0,0,0,.3); background: white; border-radius: 8px; }
+#diaryViewCard{ width:100%; max-width:800px; margin:0 auto; background:white; padding:24px; border-radius:8px; border-top:10px solid var(--red); box-shadow:0 10px 30px rgba(0,0,0,.3); }
+
+.j-title{ text-align:center; font-size:20px; font-weight:900; margin-bottom:14px; color: var(--black); }
 .j-meta{ text-align:right; font-size:11px; color:#64748b; margin-bottom:6px; }
-table.j-table{ width:100%; border-collapse:collapse; }
-table.j-table th{ background:var(--red); color:white; font-size:11.5px; padding:10px 6px; border:1px solid #c0050f; }
+.table-responsive { width: 100%; overflow-x: auto; }
+table.j-table{ width:100%; border-collapse:collapse; background: white; }
+table.j-table th{ background:var(--black); color:white; font-size:11.5px; padding:10px 6px; border:1px solid #cbd5e1; }
 table.j-table td{ border:1px solid #cbd5e1; padding:5px; font-size:11px; vertical-align:middle; }
 td.goal-cell{ background:var(--salmon); }
-tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-child{ background:#f1f5f9; font-weight:bold; text-align:center; }
+tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-child{ background:#f1f5f9; font-weight:bold; text-align:center; color: var(--black); }
 .goal-cell textarea{ width:100%; border:none; background:transparent; resize:none; font-size:11px; font-family:inherit; min-height:38px; outline: none; }
 .eval-helper { font-size: 9.5px; color: #64748b; margin-top: 6px; font-weight: normal; line-height: 1.4; }
 .eval-helper span { font-weight: bold; }
@@ -99,7 +103,7 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 .legend-row span.dot{ width:11px; height:11px; border-radius:50%; display:inline-block; margin-right:5px; }
 .charts-row{ display:flex; justify-content:center; gap:60px; margin-top:20px; flex-wrap:wrap; }
 .chart-box{ width:260px; text-align:center; }
-.chart-box h4{ font-size:12px; margin-bottom:6px; }
+.chart-box h4{ font-size:12px; margin-bottom:6px; color: var(--black); }
 .note-box{ margin-top:14px; border-radius:6px; padding:14px 18px; border-left:8px solid; }
 .note-box textarea{ width:100%; border:1px solid #e2e8f0; border-radius:5px; padding:8px; font-size:12px; font-family:inherit; resize:vertical; outline: none; }
 .note-box textarea:focus { border-color: #94a3b8; }
@@ -107,22 +111,20 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 .actions-row button{ padding:8px 16px; border:none; border-radius:5px; font-size:12px; font-weight:bold; cursor:pointer; color:white; transition: opacity 0.2s;}
 .actions-row button:hover{ opacity: 0.9; }
 
-/* 📷 포토 일지(Calendar) 전용 CSS */
-#diaryViewCard{ max-width:800px; width:100%; padding:24px; border-top:10px solid var(--red); box-shadow:0 10px 30px rgba(0,0,0,.3); margin:0 auto; background:white; border-radius:8px;}
-.cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; font-weight:900; font-size:20px; }
-.cal-header button { border:none; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; font-size:16px; padding:8px 14px; transition:all 0.2s;}
-.cal-header button:hover { background:var(--red); color:white; border-color:var(--red); }
-.cal-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; text-align:center; margin-bottom: 24px;}
-.cal-day-name { font-size:12px; color:#64748b; font-weight:bold; padding-bottom:8px; border-bottom:2px solid #e2e8f0; margin-bottom:8px;}
-.cal-cell { aspect-ratio: 1; border:1px solid #e2e8f0; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:8px; cursor:pointer; font-size:14px; font-weight:bold; position:relative; transition:background 0.2s;}
-.cal-cell:hover { background:#f1f5f9; }
-.cal-cell.has-entry { border-color:var(--red); color:var(--red); background:#fff5f5; }
-.cal-dot { width:8px; height:8px; background:var(--red); border-radius:50%; margin-top:6px; box-shadow:0 2px 4px rgba(227,6,19,0.4); }
-.cal-cell.empty { border:none; cursor:default; background:transparent; }
-.cal-cell.empty:hover { background:transparent; }
-.diary-large-view { border-top: 2px dashed #cbd5e1; padding-top: 24px; }
-.diary-large-view img { width: 100%; max-height: 60vh; object-fit: contain; border-radius: 8px; background: #f8fafc; border:1px solid #e2e8f0; }
+/* 사이드바 소형 달력 CSS */
+.sidebar-cal { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 16px; }
+.sidebar-cal .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 900; font-size: 13px; color: var(--black); }
+.sidebar-cal .cal-header button { border: none; background: white; border-radius: 4px; padding: 4px 8px; cursor: pointer; border: 1px solid #cbd5e1; font-size: 10px; }
+.sidebar-cal .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.sidebar-cal .cal-day-name { font-size: 10px; color: #64748b; font-weight: bold; margin-bottom: 4px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+.sidebar-cal .cal-cell { font-size: 11px; padding: 6px 0; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; border: 1px solid transparent; color: #334155; }
+.sidebar-cal .cal-cell:hover { background: #e2e8f0; }
+.sidebar-cal .cal-cell.has-entry { background: white; border-color: #cbd5e1; font-weight: bold; color: var(--red); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.sidebar-cal .cal-dot { width: 5px; height: 5px; background: var(--black); border-radius: 50%; margin-top: 2px; }
+.sidebar-cal .cal-cell.empty { cursor: default; }
+.sidebar-cal .cal-cell.empty:hover { background: transparent; }
 
+.diary-large-view img { width: 100%; max-height: 60vh; object-fit: contain; border-radius: 8px; background: #f8fafc; border:1px solid #e2e8f0; }
 .diary-item{ display:flex; align-items:center; gap:8px; padding:8px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:6px; cursor:pointer; font-size:12px; font-weight:bold; transition: background 0.2s;}
 .diary-item img{ width:42px; height:42px; object-fit:cover; border-radius:4px; }
 .diary-item:hover{ background:#f8fafc; }
@@ -163,54 +165,79 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   #journalCard{ position:absolute; top:0; left:0; width:100%; box-shadow:none; }
 }
 
-/* ★ 모바일 반응형 카드 완벽 해결 CSS ★ */
+/* ★ 모바일 반응형 가로 스크롤 & 아코디언 완전 정복 CSS ★ */
 @media (max-width: 820px){
   .layout{ flex-direction:column; min-height:auto; }
   .sidebar{ width:100%; min-width:auto; border-right:none; border-bottom:4px solid var(--red); max-height:60vh; overflow-y:auto; }
   
-  /* 메인 영역 및 테이블 요소 가로폭 100% 강제 확정 */
   .main{ padding:12px; width:100%; box-sizing: border-box; }
   #journalCard{ width:100%; padding:16px 14px; border-top-width:10px; box-sizing: border-box; }
   .j-title{ font-size:18px; line-height: 1.3; margin-bottom: 18px; }
   
-  table.j-table { display: block; width: 100%; border: none; box-sizing: border-box; }
-  table.j-table thead { display: none; }
-  table.j-table tbody { display: block; width: 100%; box-sizing: border-box; }
-  table.j-table tr { display: block; width: 100%; margin-bottom: 18px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.06); box-sizing: border-box; }
-  table.j-table td { display: block; width: 100%; border: none; border-bottom: 1px solid #e2e8f0; padding: 14px; position: relative; background: white; box-sizing: border-box; }
-  table.j-table td:last-child { border-bottom: none; }
+  /* 가로 스와이프를 위한 부모 컨테이너 처리 */
+  .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 15px; }
   
-  table.j-table td::before { 
-    content: attr(data-label); display: block; font-weight: 900; font-size: 12.5px; color: #0f172a; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px;
+  /* 모바일용 테이블 강제 플렉스 구조 */
+  table.j-table { display: flex; flex-direction: column; gap: 10px; min-width: max-content; }
+  table.j-table thead { display: none; }
+  table.j-table tbody { display: contents; }
+  
+  /* 각 줄(tr)을 하나의 가로 막대(Row)로 변환 */
+  table.j-table tr { 
+    display: flex; flex-direction: row; flex-wrap: nowrap; 
+    border: 1px solid #cbd5e1; border-radius: 8px; background: white; 
+    overflow: visible; width: max-content; min-width: 100%; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: width 0.3s ease;
   }
   
-  /* 아코디언 헤더 폭 100% 보장 및 정렬 */
+  /* 내부 셀(td) 설정 */
+  table.j-table td { 
+    display: block; border: none; border-right: 1px solid #e2e8f0; 
+    width: 160px; flex-shrink: 0; padding: 12px; position: relative; 
+    background: white; box-sizing: border-box; 
+  }
+  table.j-table td:last-child { border-right: none; }
+  
+  /* 모바일용 데이터 라벨 삽입 (헤더 대체) */
+  table.j-table td::before { 
+    content: attr(data-label); display: block; font-weight: 900; font-size: 11.5px; 
+    color: #0f172a; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; 
+    padding-bottom: 6px; white-space: normal; line-height: 1.3;
+  }
+
+  /* 왼쪽 첫 번째 칸(제목 칸)을 화면 좌측에 고정(Sticky) */
   tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-child { 
-    display: flex !important; width: 100%; justify-content: space-between; align-items: center;
-    background: var(--black); color: white; font-size: 14px; padding: 14px; border-bottom: none; box-sizing: border-box;
+    position: sticky; left: 0; z-index: 10; width: 110px; 
+    background: var(--black); color: white; border-right: 2px solid var(--red);
+    display: flex !important; flex-direction: column; justify-content: center; align-items: center; 
+    text-align: center; border-radius: 8px 0 0 8px; padding: 10px;
   }
   tr.goal-row td:first-child::before, tr.score-row td:first-child::before, tr.video-row td:first-child::before { display: none; }
   
-  /* 모바일 아코디언(접기/펴기) 작동 CSS */
-  .acc-icon { display: inline-block; transition: transform 0.2s; font-size: 14px; padding-left:10px; }
-  tr.goal-row td:first-child { cursor: pointer; }
-  tr.goal-row td.goal-cell { display: none; } /* 내용 숨김 */
-  tr.goal-row.acc-expanded td.goal-cell { display: block; } /* 내용 펴짐 */
-  tr.goal-row.acc-expanded td:first-child .acc-icon { transform: rotate(180deg); }
-
-  .eval-helper { color: #cbd5e1; }
-  .eval-helper span { color: #fca5a5 !important; }
+  /* 아코디언 로직 적용 (개인 목적 줄만) */
+  tr.goal-row td:first-child { cursor: pointer; width: 100%; flex-direction: row; justify-content: space-between; border-radius: 8px; border-right: none; transition: width 0.3s; }
+  tr.goal-row td.goal-cell { display: none; } /* 기본적으로 숨김 (막대 형태) */
   
-  .goal-cell textarea { min-height: 50px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #f8fafc; font-size: 13px; margin-top: 4px; width: 100%; box-sizing: border-box;}
-  .tap-row { justify-content: flex-start; gap: 6px; }
-  .tap-btn { width: 34px; height: 34px; font-size: 14px; }
-  .tap-val { font-size: 15px; margin-left: 10px; }
+  /* 터치해서 열렸을 때 */
+  tr.goal-row.acc-expanded { cursor: default; }
+  tr.goal-row.acc-expanded td:first-child { width: 110px; flex-direction: column; justify-content: center; border-radius: 8px 0 0 8px; border-right: 2px solid var(--red); }
+  tr.goal-row.acc-expanded td.goal-cell { display: block; } /* 내용이 좌측으로 스크롤되며 펼쳐짐 */
+
+  .acc-icon { display: inline-block; transition: transform 0.3s; font-size: 14px; padding-left:10px; }
+  tr.goal-row.acc-expanded .acc-icon { transform: rotate(180deg); margin-top: 10px; padding-left: 0; }
+
+  /* 헬퍼 및 기타 UI 수정 */
+  .eval-helper { color: #cbd5e1; font-size: 8.5px; }
+  .eval-helper span { color: #fca5a5 !important; }
+  .goal-cell textarea { min-height: 70px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #f8fafc; font-size: 13px; margin-top: 4px; width: 100%; box-sizing: border-box;}
+  .tap-row { justify-content: flex-start; gap: 4px; }
+  .tap-btn { width: 30px; height: 30px; font-size: 12px; }
+  .tap-val { font-size: 14px; margin-left: 8px; }
   .video-cell input { padding: 8px; font-size: 12px; margin-bottom: 6px; width: 100%; box-sizing: border-box;}
   .video-cell button { padding: 8px; font-size: 11px; }
 
   .chart-box{ width:100%; margin-bottom: 24px; box-sizing: border-box;}
   .card{ padding:14px; box-sizing: border-box;}
-
   .analytics-controls { flex-direction: column; align-items: stretch !important; }
   .analytics-controls select { width: 100%; margin-bottom: 8px; }
 }
@@ -332,7 +359,7 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   </div>
 </div>
 
-<!-- 분기별 리포트 생성을 위한 백그라운드 캔버스 컨테이너 (숨김 처리) -->
+<!-- 분기별 리포트 생성을 위한 백그라운드 캔버스 컨테이너 -->
 <div id="pdfReportContainer"></div>
 
 <script>
@@ -358,8 +385,8 @@ let regPhotoData = "", googleRegPhotoData = "", pendingGoogleAuth = null, pendin
 let playersInfo = {}, diaryListCache = [], byTypeCache = null;
 let playerChart, coachChart, growthChart, autoSaveTimer;
 let analyticsRadarChart, analyticsLineChart;
-let reportData = null; // PDF 출력용 임시 데이터 보관
-let analyticsMode = 'player'; // 'player' or 'week'
+let reportData = null; 
+let analyticsMode = 'player'; 
 let calDate = new Date(); // 달력 현재 페이지 추적용
 
 /* ---------- 커스텀 UI 함수 ---------- */
@@ -579,11 +606,11 @@ function enterApp(){
   if (currentUser.photo) { av.src = currentUser.photo; av.style.display = 'inline-block'; } else av.style.display = 'none';
   if (currentUser.role !== 'player' && currentUser.role !== 'coach') { showPendingScreen(); return; }
   document.getElementById('userLabel').innerText = `${currentUser.name} (${currentUser.role==='player'?'선수':'지도자'}${currentUser.isAdmin?' · 관리자':''})`;
-  if (currentUser.role === 'player') { currentPlayerId = currentUser.id; currentPlayerName = currentUser.name; renderPlayerSidebar(); }
-  else { 
-    // 지도자용 진입 처리
+  if (currentUser.role === 'player') { 
+    currentPlayerId = currentUser.id; currentPlayerName = currentUser.name; 
+    renderPlayerSidebar(); 
+  } else { 
     renderCoachSidebar(); 
-    // 처음에 자동으로 전체 대시보드를 보여줍니다.
     showDashboard(); 
   }
 }
@@ -628,12 +655,12 @@ function switchMode(mode){
   else renderCycleBody();
 }
 function renderCycleBody(){
-  // 지도자인 경우 입력 폼 숨기기 처리
+  // 지도자인 경우 일지 작성 폼 완전히 숨김 (조회용 UI)
   if (currentUser.role === 'coach') {
     document.getElementById('sidebarBody').innerHTML = `
       <h3>일지 유형</h3>${typeSelectHtml()}
       <hr style="margin: 18px 0 10px; border:0; border-top: 1px dashed #cbd5e1;">
-      <h3 style="margin-top:0;">${currentPlayerName} 일지 목록</h3>
+      <h3 style="margin-top:0;">${currentPlayerName} 주기화 목록</h3>
       <div id="archiveList">불러오는 중...</div>`;
   } else {
     // 선수용 UI
@@ -684,7 +711,6 @@ async function createEntry(){
   const label = document.getElementById('newWeekLabel').value.trim() || '1주차';
   if (!dateVal) { await uiAlert('주차 시작일을 선택해주세요.'); return; }
   
-  // 주차 중복 검사 (한 주에 1개만 작성 허용)
   const res = await api({ action:'listEntries', playerId: currentPlayerId, type: currentType });
   if (res.ok) {
     const existing = res.entries.find(e => e.weekStartDate === dateVal);
@@ -722,6 +748,7 @@ function loadEntry(entryId){
 
 /* ---------- 선수 포토 일지 (달력형 뷰) ---------- */
 function renderDiaryBody(){
+  // 선수용: 입력 폼 + 최근 7일 + 소형 달력
   document.getElementById('sidebarBody').innerHTML = `
     <h3>새 일지 사진</h3>
     <label style="font-size:11px; color:#64748b;">날짜</label>
@@ -736,32 +763,51 @@ function renderDiaryBody(){
     <label style="font-size:11px; color:#64748b;">메모 (선택)</label>
     <textarea id="diaryMemo" rows="2"></textarea>
     <button class="btn btn-red" onclick="saveDiary()">일지 저장</button>
+    
     <hr style="margin: 18px 0 10px; border:0; border-top: 1px dashed #cbd5e1;">
     <h3 style="margin-top:0;">최근 일지 (7일)</h3>
-    <div id="diaryList">불러오는 중...</div>`;
-  initCalendarView();
+    <div id="diaryList">불러오는 중...</div>
+    
+    <div class="sidebar-cal">
+      <div class="cal-header">
+        <button onclick="changeCalMonth(-1)"><i class="fa fa-chevron-left"></i></button>
+        <span id="calTitle"></span>
+        <button onclick="changeCalMonth(1)"><i class="fa fa-chevron-right"></i></button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  `;
+  initDiaryView();
   loadDiaryList();
 }
 function renderCoachDiaryBody(){
+  // 지도자용: 깔끔하게 최근 7일 + 소형 달력만
   document.getElementById('sidebarBody').innerHTML = `
-    <h3>최근 일지 (7일)</h3>
-    <p style="font-size:11px; color:#94a3b8; margin-top:-6px;">우측 달력에서 날짜를 선택하여 전체 사진을 볼 수 있습니다.</p>
-    <div id="diaryList">불러오는 중...</div>`;
-  initCalendarView();
+    <h3 style="margin-top:0;">${currentPlayerName} 최근 일지 (7일)</h3>
+    <div id="diaryList">불러오는 중...</div>
+    
+    <div class="sidebar-cal">
+      <div class="cal-header">
+        <button onclick="changeCalMonth(-1)"><i class="fa fa-chevron-left"></i></button>
+        <span id="calTitle"></span>
+        <button onclick="changeCalMonth(1)"><i class="fa fa-chevron-right"></i></button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  `;
+  initDiaryView();
   loadDiaryList();
 }
 
-function initCalendarView() {
+function initDiaryView() {
   hidePanels();
   document.getElementById('diaryViewWrapper').style.display = 'block';
   document.getElementById('diaryViewCard').innerHTML = `
-    <div class="cal-header">
-      <button onclick="changeCalMonth(-1)"><i class="fa fa-chevron-left"></i></button>
-      <span id="calTitle"></span>
-      <button onclick="changeCalMonth(1)"><i class="fa fa-chevron-right"></i></button>
+    <div id="calDetail" class="diary-large-view" style="display:none; border-top:none; padding-top:0;"></div>
+    <div id="calDetailEmpty" style="text-align:center; color:#94a3b8; padding:40px;">
+      <i class="fa fa-calendar-alt fa-3x" style="opacity:0.3; margin-bottom:14px;"></i><br>
+      좌측 목록이나 달력에서<br>날짜를 선택하면 사진을 볼 수 있습니다.
     </div>
-    <div class="cal-grid" id="calGrid"></div>
-    <div id="calDetail" class="diary-large-view" style="display:none;"></div>
   `;
 }
 
@@ -801,21 +847,25 @@ function renderCalendar() {
 function viewDiaryByDate(dateStr) {
   const entries = diaryListCache.filter(x => x.date === dateStr);
   const detail = document.getElementById('calDetail');
+  const empty = document.getElementById('calDetailEmpty');
+  
   if(entries.length === 0) {
     detail.style.display = 'none';
+    empty.style.display = 'block';
     return;
   }
+  
+  empty.style.display = 'none';
   detail.style.display = 'block';
-  // 크게 보여주기 위해 렌더링
   detail.innerHTML = entries.map(d => `
     <div style="margin-bottom: 30px;">
-      <h3 style="margin:0 0 12px; font-size:18px;">${d.playerName || currentPlayerName} — ${d.date}</h3>
+      <h3 style="margin:0 0 12px; font-size:22px; font-weight:900; color:var(--black); border-bottom:3px solid var(--red); display:inline-block; padding-bottom:6px;">${d.playerName || currentPlayerName} — ${d.date}</h3>
       <img src="${d.photoUrl}">
-      ${d.memo ? `<p style="font-size:14px; white-space:pre-wrap; background:#f8fafc; padding:16px; border-radius:8px; margin-top:12px; border:1px solid #e2e8f0; line-height:1.5;">${esc(d.memo)}</p>` : ''}
-      ${currentUser.role === 'coach' ? `<button class="btn btn-outline" style="margin-top:12px; border-color:#ef4444; color:#ef4444; width:auto; padding:6px 16px;" onclick="deleteDiary('${d.diaryId}')"><i class="fa fa-trash"></i> 이 사진 삭제</button>` : ''}
+      ${d.memo ? `<p style="font-size:14px; white-space:pre-wrap; background:#f8fafc; padding:16px; border-radius:8px; margin-top:12px; border:1px solid #e2e8f0; line-height:1.5; color:#334155;">${esc(d.memo)}</p>` : ''}
+      ${currentUser.role === 'coach' ? `<div style="text-align:right;"><button class="btn btn-outline" style="margin-top:12px; border-color:#ef4444; color:#ef4444; width:auto; padding:6px 16px; display:inline-block;" onclick="deleteDiary('${d.diaryId}')"><i class="fa fa-trash"></i> 이 사진 삭제</button></div>` : ''}
     </div>
   `).join('');
-  detail.scrollIntoView({behavior: 'smooth', block: 'start'});
+  document.getElementById('diaryViewCard').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 function handleDiaryPhoto(e){
@@ -851,10 +901,10 @@ async function loadDiaryList(){
   // 내림차순 정렬
   diaryListCache = res.diary.sort((a,b) => new Date(b.date) - new Date(a.date));
   
-  renderCalendar(); // 달력 점 찍기
+  renderCalendar(); // 사이드바 소형 달력 렌더링
 
   const recent7 = diaryListCache.slice(0, 7); // 사이드바에는 최근 7개만
-  if (!recent7.length) { el.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">작성된 일지 사진이 없습니다.</div>'; return; }
+  if (!recent7.length) { el.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">최근 7일 내 일지 사진이 없습니다.</div>'; return; }
   
   el.innerHTML = recent7.map(d => `
     <div class="diary-item" onclick="viewDiaryByDate('${d.date}')">
@@ -868,7 +918,8 @@ async function deleteDiary(diaryId){
   if (res.ok) { 
     uiToast('삭제되었습니다.'); 
     await loadDiaryList();
-    document.getElementById('calDetail').style.display = 'none'; // 삭제 후 상세화면 닫기
+    document.getElementById('calDetail').style.display = 'none';
+    document.getElementById('calDetailEmpty').style.display = 'block';
   } else await uiAlert(res.error, '삭제 오류');
 }
 
@@ -877,7 +928,6 @@ async function renderCoachSidebar() {
   try {
     const sb = document.getElementById('sidebar');
     
-    // HTML을 한 번에 세팅하여 중간에 DOM이 초기화되는 오류를 원천 차단
     let baseHtml = `
       <button class="btn btn-black" onclick="showDashboard()"><i class="fa fa-table-columns"></i> 전체 대시보드</button>
       <button class="btn btn-outline" onclick="showAnalytics()"><i class="fa fa-chart-pie"></i> 📊 심층 분석 대시보드</button>
@@ -990,18 +1040,32 @@ function onPlayerChange(){
   currentEntry = null; showEmpty();
   const area = document.getElementById('playerDetailArea');
   if (!currentPlayerId) { area.innerHTML = ''; return; }
+  
+  // 지도자가 선수를 선택했을 때, 작성/입력 폼이 없는 깔끔한 조회용 UI 모드로 진입합니다.
   area.innerHTML = `<div class="mode-toggle" style="margin-top:14px;">
-    <button id="modeCycle" onclick="switchMode('cycle')">📋 주기화</button>
-    <button id="modeDiary" onclick="switchMode('diary')">📷 일지</button>
+    <button id="modeCycle" onclick="switchMode('cycle')">📋 주기화 목록</button>
+    <button id="modeDiary" onclick="switchMode('diary')">📷 포토 일지</button>
   </div><div id="sidebarBody"></div>`;
   switchMode('cycle');
 }
 
-/* ---------- 전체 대시보드 ---------- */
+/* ---------- 전체 대시보드 (포토일지 추가) ---------- */
 async function showDashboard(){
+  hidePanels(); document.getElementById('dashboardWrapper').style.display = 'block';
+  document.getElementById('dashboardCard').innerHTML = '<div style="text-align:center; padding: 40px; color:#64748b;"><i class="fa fa-spinner fa-spin fa-2x" style="margin-bottom:16px;"></i><br><b style="color:var(--black);">전체 주기화 및 포토 일지 데이터를 분석 중입니다...</b><br><br><span style="font-size:12px;">선수 전체의 일지를 개별 스캔하고 있어 <b>2~3초 정도 소요</b>될 수 있습니다.</span></div>';
+
   const res = await api({ action:'getAllData', requesterId: currentUser.id });
   if (!res.ok) { await uiAlert(res.error, '오류'); return; }
-  hidePanels(); document.getElementById('dashboardWrapper').style.display = 'block';
+
+  const players = res.users.filter(u => u.role==='player');
+  
+  // 백엔드 한계 극복: 포토일지를 모두 병렬로 가져옴
+  const diariesPromises = players.map(p => api({ action: 'listDiary', playerId: p.id }, true));
+  const diariesResponses = await Promise.all(diariesPromises);
+  const allDiariesMap = {};
+  players.forEach((p, idx) => {
+    allDiariesMap[p.id] = diariesResponses[idx].ok ? diariesResponses[idx].diary : [];
+  });
 
   // 피드백 미작성(할 일) 목록 추출
   const pendingFeedbacks = res.entries.filter(e => {
@@ -1025,25 +1089,34 @@ async function showDashboard(){
     </div>`;
   }
 
-  const players = res.users.filter(u => u.role==='player');
   const thisMonday = dateStr(monday(new Date()));
   const types = Object.keys(JOURNAL_TYPES);
   let pSum=0, pCnt=0, cSum=0, cCnt=0;
 
   const rows = players.map(p => {
-    const cells = types.map(t => {
+    // 1. 주기화 셀
+    const cycleCells = types.map(t => {
       const es = res.entries.filter(e => e.playerId===p.id && e.type===t && e.playerScores).sort((a,b)=> new Date(b.weekStartDate)-new Date(a.weekStartDate));
       const latest = es[0];
-      if (!latest) return `<td style="text-align:center; color:#cbd5e1; padding:8px;">미작성</td>`;
+      if (!latest) return `<td style="text-align:center; color:#cbd5e1; padding:8px; border:1px solid #e2e8f0;">미작성</td>`;
       const done = latest.weekStartDate >= thisMonday;
       const pa = avg(latest.playerScores), ca = avg(latest.coachScores);
       pSum+=pa; pCnt++; cSum+=ca; cCnt++;
-      return `<td style="text-align:center; padding:8px;">
+      return `<td style="text-align:center; padding:8px; border:1px solid #e2e8f0; background:${done?'#f0fdf4':'white'};">
         <div style="font-size:10px; color:${done?'#16a34a':'#ef4444'}; font-weight:bold;">${done?'✔ 이번주 작성':'⚠ '+(latest.weekLabel||latest.weekStartDate)}</div>
         <div style="font-size:10.5px;">선수 ${pa} · 지도자 ${ca}</div></td>`;
     }).join('');
-    return `<tr style="border-bottom:1px solid #eee;"><td style="font-weight:bold; padding:8px; white-space:nowrap;">
-      ${p.photo?`<img src="${p.photo}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">`:''}${p.name}</td>${cells}</tr>`;
+
+    // 2. 포토일지 셀
+    const recentDiaries = allDiariesMap[p.id].filter(d => d.date >= thisMonday);
+    const hasDiary = recentDiaries.length > 0;
+    const diaryCell = `<td style="text-align:center; padding:8px; border:1px solid #e2e8f0; background:${hasDiary?'#f0fdf4':'white'};">
+      <div style="font-size:11px; color:${hasDiary?'#16a34a':'#94a3b8'}; font-weight:bold;">${hasDiary?`✔ ${recentDiaries.length}건 작성`:'미작성'}</div>
+    </td>`;
+
+    return `<tr style="border-bottom:1px solid #eee;"><td style="font-weight:bold; padding:8px; white-space:nowrap; border:1px solid #e2e8f0; border-left:none;">
+      ${p.photo?`<img src="${p.photo}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">`:''}${p.name}</td>
+      ${cycleCells}${diaryCell}</tr>`;
   }).join('');
 
   document.getElementById('dashboardCard').innerHTML = `
@@ -1056,9 +1129,13 @@ async function showDashboard(){
       <div style="flex:1; min-width:140px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:14px; text-align:center;">
         <div style="font-size:11px; color:#64748b;">팀 평균 (지도자 평가)</div><div style="font-size:24px; font-weight:900;">${cCnt?Math.round(cSum/cCnt*10)/10:0}</div></div>
     </div>
-    <div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:11.5px; min-width:600px;">
-      <thead><tr style="background:var(--black); color:white;"><th style="padding:8px; text-align:left;">선수</th>${types.map(t=>`<th style="padding:8px;">${JOURNAL_TYPES[t].title}</th>`).join('')}</tr></thead>
-      <tbody>${rows || `<tr><td colspan="${types.length+1}" style="text-align:center; color:#94a3b8; padding:20px;">등록된 선수가 없습니다.</td></tr>`}</tbody>
+    <div class="table-responsive"><table style="width:100%; border-collapse:collapse; font-size:11.5px; min-width:650px;">
+      <thead><tr style="background:var(--black); color:white;">
+        <th style="padding:10px 8px; text-align:left; border-right:1px solid #475569;">선수</th>
+        ${types.map(t=>`<th style="padding:10px 8px; border-right:1px solid #475569;">${JOURNAL_TYPES[t].title}</th>`).join('')}
+        <th style="padding:10px 8px;">📷 포토 일지</th>
+      </tr></thead>
+      <tbody>${rows || `<tr><td colspan="${types.length+2}" style="text-align:center; color:#94a3b8; padding:20px;">등록된 선수가 없습니다.</td></tr>`}</tbody>
     </table></div>`;
     byTypeCache = res; 
 }
@@ -1069,7 +1146,7 @@ function openPendingEntry(playerId, playerName, entryId) {
   setTimeout(() => loadEntry(entryId), 100);
 }
 
-/* ---------- 📊 선수 심층 분석 (1:1 비교, 백분위, 주차별 팀분석) ---------- */
+/* ---------- 📊 선수 심층 분석 ---------- */
 function getQuarterFromDate(dateStr) {
   const m = parseInt(dateStr.split('-')[1]);
   if(m<=3) return 'q1'; if(m<=6) return 'q2'; if(m<=9) return 'q3'; return 'q4';
@@ -1099,15 +1176,10 @@ async function showAnalytics(){
       <button id="tabBtnPlayer" class="active" onclick="setAnalyticsMode('player')">개인 분석 및 1:1 비교</button>
       <button id="tabBtnWeek" onclick="setAnalyticsMode('week')">주차별 전체 팀 분석</button>
     </div>
-    
-    <div id="analyticsControlsArea" class="analytics-controls" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:20px; background:#f8fafc; padding:14px; border-radius:8px; border:1px solid #cbd5e1;">
-      <!-- Controls injected here via renderAnalyticsControls -->
-    </div>
-
+    <div id="analyticsControlsArea" class="analytics-controls" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:20px; background:#f8fafc; padding:14px; border-radius:8px; border:1px solid #cbd5e1;"></div>
     <div id="analyticsContent" style="display:none;"></div>
     <div id="analyticsEmpty" class="empty" style="color:#94a3b8; display:block;">기준을 선택해주세요.</div>
   `;
-  
   renderAnalyticsControls();
   renderAnalyticsCharts();
 }
@@ -1139,7 +1211,6 @@ function renderAnalyticsControls() {
       </select>
     `;
   } else {
-    // 주차별 팀 분석 모드 컨트롤
     controlsArea.innerHTML = `
       <select id="analyticsWeekType" onchange="refreshWeekSelector(); renderAnalyticsCharts()" style="flex:1; min-width:150px; font-weight:bold; border-color:var(--red);">
         ${types.map(t=>`<option value="${t}">${JOURNAL_TYPES[t].title}</option>`).join('')}
@@ -1155,20 +1226,15 @@ function renderAnalyticsControls() {
 function refreshWeekSelector() {
   const type = document.getElementById('analyticsWeekType').value;
   const map = {};
-  byTypeCache.entries.filter(e=>e.type===type && e.coachScores).forEach(e => {
-    map[e.weekStartDate] = e.weekLabel || e.weekStartDate;
-  });
+  byTypeCache.entries.filter(e=>e.type===type && e.coachScores).forEach(e => { map[e.weekStartDate] = e.weekLabel || e.weekStartDate; });
   const weeks = Object.keys(map).sort((a,b)=> new Date(b)-new Date(a));
   document.getElementById('analyticsWeekSelect').innerHTML = '<option value="">-- 분석할 주차 선택 --</option>' + 
     weeks.map(w=>`<option value="${w}">${map[w]} (${w})</option>`).join('');
 }
 
 function renderAnalyticsCharts() {
-  if (analyticsMode === 'player') {
-    renderPlayerAnalytics();
-  } else {
-    renderWeekAnalytics();
-  }
+  if (analyticsMode === 'player') renderPlayerAnalytics();
+  else renderWeekAnalytics();
 }
 
 function renderPlayerAnalytics() {
@@ -1184,7 +1250,6 @@ function renderPlayerAnalytics() {
     return;
   }
   
-  // 기간(분기) 필터링 적용
   const filteredEntries = byTypeCache.entries.filter(e => {
     if(e.type !== type) return false;
     if(period !== 'all' && getQuarterFromDate(e.weekStartDate) !== period) return false;
@@ -1205,7 +1270,6 @@ function renderPlayerAnalytics() {
   const baseName = document.getElementById('analyticsPlayer').options[document.getElementById('analyticsPlayer').selectedIndex].text;
   const compareName = comparePlayerId ? document.getElementById('analyticsComparePlayer').options[document.getElementById('analyticsComparePlayer').selectedIndex].text : '';
 
-  // 백분위 계산 (팀 내 순위)
   let playerAverages = {};
   filteredEntries.forEach(e => {
     if(!playerAverages[e.playerId]) playerAverages[e.playerId] = { sum:0, count:0 };
@@ -1255,9 +1319,7 @@ function renderPlayerAnalytics() {
   document.getElementById('analyticsContent').style.display = 'block';
   document.getElementById('analyticsEmpty').style.display = 'none';
 
-  // 차트 렌더링을 DOM 업데이트 후 지연 실행
   setTimeout(() => {
-    // 레이더 차트 계산
     let baseCatSums = cats.map(()=>0), baseCatCounts = cats.map(()=>0);
     let compCatSums = cats.map(()=>0), compCatCounts = cats.map(()=>0);
     let teamCatSums = cats.map(()=>0), teamCatCounts = cats.map(()=>0);
@@ -1274,18 +1336,11 @@ function renderPlayerAnalytics() {
       { label: `${baseName} (기준)`, data: baseCatAvgs, backgroundColor: 'rgba(227,6,19,0.3)', borderColor: '#E30613', pointBackgroundColor: '#E30613' },
       { label: '팀 전체 평균', data: teamCatAvgs, backgroundColor: 'transparent', borderColor: '#94a3b8', borderDash: [5,5], pointBackgroundColor: '#94a3b8' }
     ];
-    if(comparePlayerId) {
-      radarDatasets.push({ label: `${compareName} (비교)`, data: compCatAvgs, backgroundColor: 'rgba(2,132,199,0.2)', borderColor: '#0284c7', pointBackgroundColor: '#0284c7' });
-    }
+    if(comparePlayerId) radarDatasets.push({ label: `${compareName} (비교)`, data: compCatAvgs, backgroundColor: 'rgba(2,132,199,0.2)', borderColor: '#0284c7', pointBackgroundColor: '#0284c7' });
 
     if(analyticsRadarChart) analyticsRadarChart.destroy();
-    analyticsRadarChart = new Chart(document.getElementById('analyticsRadar'), {
-      type: 'radar',
-      data: { labels: cats, datasets: radarDatasets },
-      options: { responsive: true, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1 } } } }
-    });
+    analyticsRadarChart = new Chart(document.getElementById('analyticsRadar'), { type: 'radar', data: { labels: cats, datasets: radarDatasets }, options: { responsive: true, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1 } } } } });
 
-    // 꺾은선 차트 계산
     let allDates = new Set();
     baseEntries.forEach(e => allDates.add(e.weekStartDate));
     compareEntries.forEach(e => allDates.add(e.weekStartDate));
@@ -1299,16 +1354,10 @@ function renderPlayerAnalytics() {
       { label: `${baseName} (지도자 평가)`, data: baseLineData, borderColor: '#E30613', backgroundColor: '#E30613', tension: 0.2, spanGaps: true },
       { label: `${baseName} (선수 자가평가)`, data: pLineData, borderColor: '#fca5a5', backgroundColor: '#fca5a5', borderDash: [3,3], tension: 0.2, spanGaps: true }
     ];
-    if(comparePlayerId) {
-      lineDatasets.push({ label: `${compareName} (지도자 평가)`, data: compLineData, borderColor: '#0284c7', backgroundColor: '#0284c7', tension: 0.2, spanGaps: true });
-    }
+    if(comparePlayerId) lineDatasets.push({ label: `${compareName} (지도자 평가)`, data: compLineData, borderColor: '#0284c7', backgroundColor: '#0284c7', tension: 0.2, spanGaps: true });
 
     if(analyticsLineChart) analyticsLineChart.destroy();
-    analyticsLineChart = new Chart(document.getElementById('analyticsLine'), {
-      type: 'line',
-      data: { labels: sortedDates, datasets: lineDatasets },
-      options: { responsive: true, scales: { y: { min: 0, max: 5 } } }
-    });
+    analyticsLineChart = new Chart(document.getElementById('analyticsLine'), { type: 'line', data: { labels: sortedDates, datasets: lineDatasets }, options: { responsive: true, scales: { y: { min: 0, max: 5 } } } });
 
     reportData = { baseName, typeTitle: JOURNAL_TYPES[type].title, periodName: document.getElementById('analyticsPeriod').options[document.getElementById('analyticsPeriod').selectedIndex].text, baseOverallAvg, percentileStr, latestFeedbacks: baseEntries.slice(-3).map(e => ({ week: e.weekLabel||e.weekStartDate, text: e.coachFeedback })) };
   }, 50);
@@ -1317,31 +1366,14 @@ function renderPlayerAnalytics() {
 function renderWeekAnalytics() {
   const type = document.getElementById('analyticsWeekType').value;
   const week = document.getElementById('analyticsWeekSelect').value;
+  if (!week) { document.getElementById('analyticsContent').style.display = 'none'; document.getElementById('analyticsEmpty').innerText = '분석할 주차를 선택해주세요.'; document.getElementById('analyticsEmpty').style.display = 'block'; return; }
   
-  if (!week) {
-    document.getElementById('analyticsContent').style.display = 'none';
-    document.getElementById('analyticsEmpty').innerText = '분석할 주차를 선택해주세요.';
-    document.getElementById('analyticsEmpty').style.display = 'block';
-    return;
-  }
-  
-  // 해당 주차의 제출 내역 추출
   const entries = byTypeCache.entries.filter(e => e.type === type && e.weekStartDate === week);
-  
-  if (entries.length === 0) {
-    document.getElementById('analyticsContent').style.display = 'none';
-    document.getElementById('analyticsEmpty').innerText = '선택한 주차에 기록된 데이터가 없습니다.';
-    document.getElementById('analyticsEmpty').style.display = 'block';
-    return;
-  }
+  if (entries.length === 0) { document.getElementById('analyticsContent').style.display = 'none'; document.getElementById('analyticsEmpty').innerText = '선택한 주차에 기록된 데이터가 없습니다.'; document.getElementById('analyticsEmpty').style.display = 'block'; return; }
 
   const cats = JOURNAL_TYPES[type].categories;
-
-  // 팀 전체 세부 항목 평균 계산 (지도자 평가)
   let teamCatSums = cats.map(()=>0), teamCatCounts = cats.map(()=>0);
   let overallSum = 0, overallCount = 0;
-  
-  // 선수별 총점 리스트 (랭킹용)
   let playerRankings = [];
 
   entries.forEach(e => {
@@ -1350,14 +1382,12 @@ function renderWeekAnalytics() {
       overallSum += scoreAvg; overallCount++;
       playerRankings.push({ id: e.playerId, name: e.playerName, avg: scoreAvg });
     }
-    e.coachScores.forEach((score, i) => { 
-      if(score > 0) { teamCatSums[i] += score; teamCatCounts[i]++; } 
-    });
+    e.coachScores.forEach((score, i) => { if(score > 0) { teamCatSums[i] += score; teamCatCounts[i]++; } });
   });
 
   const teamCatAvgs = teamCatSums.map((sum, i) => teamCatCounts[i] ? Math.round(sum/teamCatCounts[i]*10)/10 : 0);
   const teamOverallAvg = overallCount > 0 ? Math.round(overallSum/overallCount*10)/10 : 0;
-  playerRankings.sort((a,b) => b.avg - a.avg); // 내림차순 정렬
+  playerRankings.sort((a,b) => b.avg - a.avg); 
 
   document.getElementById('analyticsContent').innerHTML = `
     <div style="background:#fff5f5; border:1px solid #fca5a5; border-radius:8px; padding:16px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -1367,7 +1397,6 @@ function renderWeekAnalytics() {
         <div style="font-size:11px; color:#64748b; margin-top:2px;">제출 및 평가 완료 선수: ${overallCount}명</div>
       </div>
     </div>
-
     <div class="charts-row" style="margin-top:0; align-items: flex-start;">
       <div class="chart-box" style="width:400px; max-width:100%;">
         <h4>이번 주 훈련 강점/약점 (세부 항목)</h4>
@@ -1377,57 +1406,32 @@ function renderWeekAnalytics() {
         <h4>이번 주 평가 점수 랭킹</h4>
         <div style="background:white; border: 1px solid #cbd5e1; border-radius:8px; overflow:hidden;">
           <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
-            <thead>
-              <tr style="background:#f1f5f9; border-bottom:1px solid #cbd5e1;">
-                <th style="padding:10px; width:50px; text-align:center;">순위</th>
-                <th style="padding:10px;">선수명</th>
-                <th style="padding:10px; text-align:center;">평균 점수</th>
-              </tr>
-            </thead>
+            <thead><tr style="background:#f1f5f9; border-bottom:1px solid #cbd5e1;"><th style="padding:10px; width:50px; text-align:center;">순위</th><th style="padding:10px;">선수명</th><th style="padding:10px; text-align:center;">평균 점수</th></tr></thead>
             <tbody>
-              ${playerRankings.length > 0 ? playerRankings.map((p, idx) => `
-                <tr style="border-bottom:1px solid #e2e8f0;">
-                  <td style="padding:10px; text-align:center; font-weight:bold; color:${idx<3?'var(--red)':'#64748b'};">${idx+1}</td>
-                  <td style="padding:10px; font-weight:bold;">${p.name}</td>
-                  <td style="padding:10px; text-align:center;">${p.avg}</td>
-                </tr>
-              `).join('') : `<tr><td colspan="3" style="padding:15px; text-align:center; color:#94a3b8;">평가 데이터가 없습니다.</td></tr>`}
+              ${playerRankings.length > 0 ? playerRankings.map((p, idx) => `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:10px; text-align:center; font-weight:bold; color:${idx<3?'var(--red)':'#64748b'};">${idx+1}</td><td style="padding:10px; font-weight:bold;">${p.name}</td><td style="padding:10px; text-align:center;">${p.avg}</td></tr>`).join('') : `<tr><td colspan="3" style="padding:15px; text-align:center; color:#94a3b8;">평가 데이터가 없습니다.</td></tr>`}
             </tbody>
           </table>
         </div>
       </div>
     </div>
   `;
-  
   document.getElementById('analyticsContent').style.display = 'block';
   document.getElementById('analyticsEmpty').style.display = 'none';
 
   setTimeout(() => {
     if(analyticsRadarChart) analyticsRadarChart.destroy();
-    analyticsRadarChart = new Chart(document.getElementById('analyticsWeekRadar'), {
-      type: 'radar',
-      data: {
-        labels: cats,
-        datasets: [{ label: '팀 평균 점수', data: teamCatAvgs, backgroundColor: 'rgba(26,26,26,0.15)', borderColor: '#1a1a1a', pointBackgroundColor: '#1a1a1a' }]
-      },
-      options: { responsive: true, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1 } } } }
-    });
+    analyticsRadarChart = new Chart(document.getElementById('analyticsWeekRadar'), { type: 'radar', data: { labels: cats, datasets: [{ label: '팀 평균 점수', data: teamCatAvgs, backgroundColor: 'rgba(26,26,26,0.15)', borderColor: '#1a1a1a', pointBackgroundColor: '#1a1a1a' }] }, options: { responsive: true, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1 } } } } });
   }, 50);
 }
 
-/* ---------- 📄 학부모 상담용 리포트 (PDF) 생성 기능 ---------- */
+/* ---------- 📄 학부모 상담용 리포트 (PDF) ---------- */
 async function generatePDFReport() {
   if(!reportData) return;
   loading(true);
-  
   try {
     const { jsPDF } = window.jspdf;
-    
-    // 1. 차트를 이미지로 변환 (html2canvas)
     const radarCanvas = await html2canvas(document.getElementById('radarCaptureArea'), { scale: 2, backgroundColor: '#ffffff' });
     const lineCanvas = await html2canvas(document.getElementById('lineCaptureArea'), { scale: 2, backgroundColor: '#ffffff' });
-    
-    // 2. 숨겨진 리포트 HTML DOM 구성
     const container = document.getElementById('pdfReportContainer');
     let feedbacksHtml = reportData.latestFeedbacks.filter(f=>f.text).map(f => `<div style="margin-bottom:10px;"><b>[${f.week}]</b><br>${esc(f.text)}</div>`).join('');
     if(!feedbacksHtml) feedbacksHtml = '<div style="color:#94a3b8;">최근 피드백이 없습니다.</div>';
@@ -1438,133 +1442,27 @@ async function generatePDFReport() {
         <p>${reportData.typeTitle} / ${reportData.periodName} 기준</p>
       </div>
       <div style="font-size:16px; font-weight:bold; margin-bottom:10px;">선수 이름: ${reportData.baseName}</div>
-      <div class="pdf-box" style="margin-bottom:20px; font-size:14px; line-height:1.6;">
-        ${reportData.percentileStr}
-      </div>
+      <div class="pdf-box" style="margin-bottom:20px; font-size:14px; line-height:1.6;">${reportData.percentileStr}</div>
       <div class="pdf-row">
-        <div class="pdf-col pdf-box">
-          <h3>세부 항목별 밸런스</h3>
-          <img src="${radarCanvas.toDataURL('image/png')}" style="width:100%; max-width:300px; display:block; margin:0 auto;">
-        </div>
-        <div class="pdf-col pdf-box">
-          <h3>기간별 성장 추이</h3>
-          <img src="${lineCanvas.toDataURL('image/png')}" style="width:100%; max-width:350px; display:block; margin:0 auto;">
-        </div>
+        <div class="pdf-col pdf-box"><h3>세부 항목별 밸런스</h3><img src="${radarCanvas.toDataURL('image/png')}" style="width:100%; max-width:300px; display:block; margin:0 auto;"></div>
+        <div class="pdf-col pdf-box"><h3>기간별 성장 추이</h3><img src="${lineCanvas.toDataURL('image/png')}" style="width:100%; max-width:350px; display:block; margin:0 auto;"></div>
       </div>
-      <div class="pdf-box">
-        <h3>최근 주요 지도자 피드백</h3>
-        <div style="font-size:12px; line-height:1.5;">${feedbacksHtml}</div>
-      </div>
+      <div class="pdf-box"><h3>최근 주요 지도자 피드백</h3><div style="font-size:12px; line-height:1.5;">${feedbacksHtml}</div></div>
       <div style="text-align:right; font-size:10px; color:#94a3b8; margin-top:30px;">출력일: ${dateStr(new Date())}</div>
     `;
 
-    // 3. 컨테이너 전체를 캡처하여 PDF로 저장
     const reportCanvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff', width: 800 });
     const imgData = reportCanvas.toDataURL('image/png');
-    
-    // A4 비율 계산
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (reportCanvas.height * pdfWidth) / reportCanvas.width;
-    
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
     pdf.save(`FC_SEOUL_리포트_${reportData.baseName}_${dateStr(new Date())}.pdf`);
-    
     uiToast('PDF 다운로드가 완료되었습니다.');
-  } catch (err) {
-    console.error(err);
-    uiAlert('PDF 생성 중 오류가 발생했습니다: ' + err.message, '오류');
-  } finally {
-    loading(false);
-  }
+  } catch (err) { uiAlert('PDF 생성 중 오류가 발생했습니다: ' + err.message, '오류'); } finally { loading(false); }
 }
 
-/* ---------- 주기화별로 보기 ---------- */
-async function showByType(){
-  hidePanels(); document.getElementById('byTypeWrapper').style.display = 'block';
-  document.getElementById('byTypeCard').innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">불러오는 중...</div>';
-  const res = await api({ action:'getAllData', requesterId: currentUser.id });
-  if (!res.ok) { document.getElementById('byTypeCard').innerHTML = `<div style="color:#ef4444;">${res.error}</div>`; return; }
-  byTypeCache = res;
-  const types = Object.keys(JOURNAL_TYPES);
-  document.getElementById('byTypeCard').innerHTML = `
-    <h2 style="margin:0 0 14px;">주기화별로 보기</h2>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px;">
-      <select id="byTypeType" onchange="onByTypeTypeChange()">${types.map(t=>`<option value="${t}">${JOURNAL_TYPES[t].title}</option>`).join('')}</select>
-      <select id="byTypeWeek" onchange="onByTypeWeekChange()"><option value="">-- 저장된 주차에서 선택 --</option></select>
-      <span style="font-size:11px; color:#94a3b8;">또는</span>
-      <input type="date" id="byTypeDate" onchange="onByTypeDateChange()">
-    </div>
-    <div id="byTypeResults"></div>`;
-  refreshByTypeWeeks();
-}
-function refreshByTypeWeeks(){
-  const type = document.getElementById('byTypeType').value;
-  const map = {};
-  byTypeCache.entries.filter(e=>e.type===type).forEach(e => map[e.weekStartDate] = e.weekLabel || e.weekStartDate);
-  const weeks = Object.keys(map).sort((a,b)=> new Date(b)-new Date(a));
-  document.getElementById('byTypeWeek').innerHTML = '<option value="">-- 저장된 주차에서 선택 --</option>' + weeks.map(w=>`<option value="${w}">${map[w]} (${w})</option>`).join('');
-}
-function onByTypeTypeChange(){ refreshByTypeWeeks(); document.getElementById('byTypeDate').value=''; document.getElementById('byTypeResults').innerHTML=''; }
-function onByTypeWeekChange(){
-  const w = document.getElementById('byTypeWeek').value; document.getElementById('byTypeDate').value='';
-  if (w) renderByTypeResults(document.getElementById('byTypeType').value, w); else document.getElementById('byTypeResults').innerHTML='';
-}
-function onByTypeDateChange(){
-  const d = document.getElementById('byTypeDate').value; document.getElementById('byTypeWeek').value='';
-  if (d) renderByTypeResults(document.getElementById('byTypeType').value, d);
-}
-function renderByTypeResults(type, week){
-  const players = byTypeCache.users.filter(u=>u.role==='player');
-  const submitted = [], missing = [];
-  players.forEach(p => {
-    const entry = byTypeCache.entries.find(e => e.playerId===p.id && e.type===type && e.weekStartDate===week);
-    (entry ? submitted.push({p,entry}) : missing.push(p));
-  });
-  document.getElementById('byTypeResults').innerHTML = `
-    <div style="display:flex; gap:24px; flex-wrap:wrap;">
-      <div style="flex:1; min-width:220px;"><h4 style="color:#16a34a;">✔ 제출함 (${submitted.length})</h4>
-        ${submitted.length ? submitted.map(s=>`<div class="list-item" style="cursor:pointer;" onclick="openByTypeEntry('${s.p.id}','${esc(s.p.name)}','${s.entry.entryId}')">
-          <span>${s.p.photo?`<img src="${s.p.photo}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">`:''}${s.p.name}</span>
-          <span style="font-size:10px; color:#64748b;">선수 ${avg(s.entry.playerScores)} · 지도자 ${avg(s.entry.coachScores)}</span></div>`).join('') : '<div style="font-size:11.5px; color:#94a3b8;">없음</div>'}</div>
-      <div style="flex:1; min-width:220px;"><h4 style="color:#ef4444;">⚠ 미제출 (${missing.length})</h4>
-        ${missing.length ? missing.map(p=>`<div class="list-item" style="opacity:.55;"><span>${p.photo?`<img src="${p.photo}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">`:''}${p.name}</span></div>`).join('') : '<div style="font-size:11.5px; color:#94a3b8;">없음</div>'}</div>
-    </div>`;
-}
-function openByTypeEntry(playerId, playerName, entryId){
-  const entry = byTypeCache.entries.find(e => e.entryId === entryId); if (!entry) return;
-  currentPlayerId = playerId; currentPlayerName = playerName; currentType = entry.type;
-  currentEntry = JSON.parse(JSON.stringify(entry));
-  currentEntry.playerComment = currentEntry.playerComment || '';
-  currentEntry.coachFeedback = currentEntry.coachFeedback || '';
-  renderJournal();
-}
-
-/* ---------- 성장 추이 (선수용) ---------- */
-async function showGrowthChart(){
-  if (!currentPlayerId) { await uiAlert('먼저 선수를 선택해주세요.'); return; }
-  const res = await api({ action:'getAllData', requesterId: currentUser.id });
-  if (!res.ok) { await uiAlert(res.error, '오류'); return; }
-  const entries = res.entries.filter(e => e.playerId===currentPlayerId && e.type===currentType && e.playerScores)
-    .sort((a,b)=> new Date(a.weekStartDate)-new Date(b.weekStartDate));
-  document.getElementById('growthModal').style.display = 'flex';
-  if (entries.length < 2) { document.getElementById('growthEmpty').style.display='block'; document.getElementById('growthCanvas').style.display='none'; return; }
-  document.getElementById('growthEmpty').style.display = 'none';
-  document.getElementById('growthCanvas').style.display = 'block';
-  const labels = entries.map(e => e.weekLabel || e.weekStartDate);
-  if (growthChart) growthChart.destroy();
-  growthChart = new Chart(document.getElementById('growthCanvas'), {
-    type:'line',
-    data:{ labels, datasets:[
-      { label:'선수 자가평가 평균', data: entries.map(e=>avg(e.playerScores)), borderColor:'#E30613', backgroundColor:'rgba(227,6,19,.1)', tension:.25 },
-      { label:'지도자 평가 평균', data: entries.map(e=>avg(e.coachScores)), borderColor:'#1a1a1a', backgroundColor:'rgba(26,26,26,.06)', tension:.25 }
-    ]},
-    options:{ responsive:true, scales:{ y:{ min:0, max:5 } }, plugins:{ legend:{ position:'bottom' } } }
-  });
-}
-function closeGrowthChart(){ document.getElementById('growthModal').style.display = 'none'; }
-
-/* ---------- 주기화 일지 렌더링 ---------- */
+/* ---------- 주기화 일지 렌더링 (모바일 가로 스크롤 & 아코디언 적용) ---------- */
 function renderJournal(){
   hidePanels(); document.getElementById('journalWrapper').style.display = 'block';
   const isPlayer = currentUser.role === 'player', isCoach = currentUser.role === 'coach';
@@ -1579,7 +1477,7 @@ function renderJournal(){
   let html = `<div class="j-title">${photo?`<img src="${photo}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;border:2px solid var(--gold);">`:''}${JOURNAL_TYPES[currentEntry.type].title} — ${currentEntry.playerName||''}</div>`;
   html += `<div class="j-meta">${currentEntry.weekLabel||''} · 시작일: ${currentEntry.weekStartDate}</div>`;
   
-  html += `<table class="j-table"><thead><tr><th>선수,지도자 (${currentEntry.weekLabel||''})</th>${cats.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+  html += `<div class="table-responsive"><table class="j-table"><thead><tr><th>선수,지도자 (${currentEntry.weekLabel||''})</th>${cats.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
 
   DAYS.forEach(d => {
     html += `<tr class="goal-row"><td data-label="구분" onclick="toggleMobileAccordion(this)">개인 목적 (${d}) <i class="fa fa-chevron-down acc-icon"></i></td>`;
@@ -1605,7 +1503,7 @@ function renderJournal(){
       ${v.url ? `<a href="${v.url}" target="_blank">▶ 영상보기</a>` : ''}
     </div></td>`;
   });
-  html += `</tr></tbody></table>`;
+  html += `</tr></tbody></table></div>`;
 
   html += `<div class="legend-row">${cats.map((c,i)=>`<div><span class="dot" style="background:${PALETTE[i]}"></span>${c}</div>`).join('')}</div>`;
   html += `<div class="charts-row"><div class="chart-box"><h4>선수 자가평가 비율</h4><canvas id="playerPie"></canvas></div><div class="chart-box"><h4>지도자 평가 비율</h4><canvas id="coachPie"></canvas></div></div>`;
@@ -1644,7 +1542,7 @@ function updatePlayerComment(el){ currentEntry.playerComment = el.value; schedul
 function updateCoachFeedback(el){ currentEntry.coachFeedback = el.value; scheduleAutoSave(); }
 
 function toggleMobileAccordion(el) {
-  if (window.innerWidth > 820) return; // 모바일 화면에서만 작동
+  if (window.innerWidth > 820) return; 
   const tr = el.closest('tr');
   tr.classList.toggle('acc-expanded');
 }
