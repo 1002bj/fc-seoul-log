@@ -21,7 +21,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-/* CSS 스타일링 */
 :root{ --red:#E30613; --black:#1a1a1a; --gold:#C5A059; --bg:#334155; --salmon:#F5B7B1; }
 *{ box-sizing:border-box; -webkit-print-color-adjust:exact; }
 body{ margin:0; font-family:'Apple SD Gothic Neo', sans-serif; background:var(--bg); }
@@ -112,7 +111,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 .actions-row button{ padding:8px 16px; border:none; border-radius:5px; font-size:12px; font-weight:bold; cursor:pointer; color:white; transition: opacity 0.2s;}
 .actions-row button:hover{ opacity: 0.9; }
 
-/* 대시보드 호버 이펙트 */
 .dash-cell { transition: filter 0.2s; cursor: pointer; }
 .dash-cell:hover { filter: brightness(0.93); }
 
@@ -182,15 +180,12 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   #journalCard{ width:100%; padding:16px 14px; border-top-width:10px; box-sizing: border-box; }
   .j-title{ font-size:18px; line-height: 1.3; margin-bottom: 18px; }
   
-  /* 가로 스와이프를 위한 부모 컨테이너 처리 */
   .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 15px; }
   
-  /* 모바일용 테이블 강제 플렉스 구조 */
   table.j-table { display: flex; flex-direction: column; gap: 10px; min-width: max-content; }
   table.j-table thead { display: none; }
   table.j-table tbody { display: contents; }
   
-  /* 각 줄(tr)을 하나의 가로 막대(Row)로 변환 */
   table.j-table tr { 
     display: flex; flex-direction: row; flex-wrap: nowrap; 
     border: 1px solid #cbd5e1; border-radius: 8px; background: white; 
@@ -198,7 +193,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
     box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: width 0.3s ease;
   }
   
-  /* 내부 셀(td) 설정 */
   table.j-table td { 
     display: block; border: none; border-right: 1px solid #e2e8f0; 
     width: 160px; flex-shrink: 0; padding: 12px; position: relative; 
@@ -206,14 +200,12 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   }
   table.j-table td:last-child { border-right: none; }
   
-  /* 모바일용 데이터 라벨 삽입 (헤더 대체) */
   table.j-table td::before { 
     content: attr(data-label); display: block; font-weight: 900; font-size: 11.5px; 
     color: #0f172a; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; 
     padding-bottom: 6px; white-space: normal; line-height: 1.3;
   }
 
-  /* 왼쪽 첫 번째 칸(제목 칸)을 화면 좌측에 고정(Sticky) */
   tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-child { 
     position: sticky; left: 0; z-index: 10; width: 110px; 
     background: var(--black); color: white; border-right: 2px solid var(--red);
@@ -222,19 +214,16 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   }
   tr.goal-row td:first-child::before, tr.score-row td:first-child::before, tr.video-row td:first-child::before { display: none; }
   
-  /* 아코디언 로직 적용 (개인 목적 줄만) */
   tr.goal-row td:first-child { cursor: pointer; width: 100%; flex-direction: row; justify-content: space-between; border-radius: 8px; border-right: none; transition: width 0.3s; }
-  tr.goal-row td.goal-cell { display: none; } /* 기본적으로 숨김 (막대 형태) */
+  tr.goal-row td.goal-cell { display: none; } 
   
-  /* 터치해서 열렸을 때 */
   tr.goal-row.acc-expanded { cursor: default; }
   tr.goal-row.acc-expanded td:first-child { width: 110px; flex-direction: column; justify-content: center; border-radius: 8px 0 0 8px; border-right: 2px solid var(--red); }
-  tr.goal-row.acc-expanded td.goal-cell { display: block; } /* 내용이 좌측으로 스크롤되며 펼쳐짐 */
+  tr.goal-row.acc-expanded td.goal-cell { display: block; } 
 
   .acc-icon { display: inline-block; transition: transform 0.3s; font-size: 14px; padding-left:10px; }
   tr.goal-row.acc-expanded .acc-icon { transform: rotate(180deg); margin-top: 10px; padding-left: 0; }
 
-  /* 헬퍼 및 기타 UI 수정 */
   .eval-helper { color: #cbd5e1; font-size: 8.5px; }
   .eval-helper span { color: #fca5a5 !important; }
   .goal-cell textarea { min-height: 70px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #f8fafc; font-size: 13px; margin-top: 4px; width: 100%; box-sizing: border-box;}
@@ -391,8 +380,8 @@ let currentUser = null, currentType = "dribble", currentEntry = null;
 let currentPlayerId = null, currentPlayerName = null, sidebarMode = "cycle";
 let regPhotoData = "", googleRegPhotoData = "", pendingGoogleAuth = null, pendingDiaryPhoto = null;
 let playersInfo = {}, diaryListCache = [], byTypeCache = null;
-let playerChart, coachChart, growthChart, autoSaveTimer;
-let analyticsRadarChart, analyticsLineChart;
+let autoSaveTimer = null;
+let playerChart, coachChart, growthChart, analyticsRadarChart, analyticsLineChart;
 let reportData = null; 
 let analyticsMode = 'player'; 
 let calDate = new Date(); 
@@ -563,7 +552,19 @@ function setUser(user){
   localStorage.setItem('tj_user', JSON.stringify(user));
   enterApp();
 }
-function logout(){
+
+// ✨ 로그아웃이나 화면 닫기 전에 저장되지 않은 데이터 강제 전송
+async function flushPendingSaves() {
+  if (autoSaveTimer && currentEntry) {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = null;
+    const res = await api({ action:'saveEntry', entry: currentEntry, editedBy: currentUser.id }, true);
+    if(res.ok) currentEntry.entryId = res.entryId;
+  }
+}
+
+async function logout(){
+  await flushPendingSaves();
   currentUser = null; currentEntry = null; currentPlayerId = null;
   localStorage.removeItem('tj_user');
   document.getElementById('appScreen').style.display = 'none';
@@ -665,7 +666,8 @@ function renderPlayerSidebar(){
     <div id="sidebarBody"></div>`;
   switchMode(sidebarMode);
 }
-function switchMode(mode){
+async function switchMode(mode){
+  await flushPendingSaves(); // ✨ 다른 메뉴 탭을 누르면 미저장 데이터 즉시 서버 동기화
   sidebarMode = mode;
   const btnCycle = document.getElementById('modeCycle');
   const btnDiary = document.getElementById('modeDiary');
@@ -679,7 +681,6 @@ function switchMode(mode){
     renderCycleBody(); 
   }
 }
-
 function renderCycleBody(){
   if (currentUser.role === 'coach') {
     document.getElementById('sidebarBody').innerHTML = `
@@ -706,7 +707,8 @@ function renderCycleBody(){
   loadArchive();
 }
 
-function onTypeChange(){ 
+async function onTypeChange(){ 
+  await flushPendingSaves();
   currentType = document.getElementById('typeSelect').value; 
   currentEntry = null; 
   showEmpty(); 
@@ -907,6 +909,7 @@ function viewDiaryByDate(dateStr) {
         </div>
       </div>
       
+      <!-- 수정 폼 영역 -->
       <div id="diaryMemoEditForm_${d.diaryId}" style="display:none; background:#f8fafc; padding:16px; border-radius:8px; margin-top:12px; border:1px solid #cbd5e1;">
         <label style="font-size:11px; font-weight:bold; color:var(--red); display:block; margin-bottom:6px;">새 메모 내용</label>
         <textarea id="diaryMemoInput_${d.diaryId}" style="width:100%; min-height:80px; padding:10px; border:1px solid #cbd5e1; border-radius:4px; font-size:13px; font-family:inherit;">${esc(d.memo || '')}</textarea>
@@ -937,7 +940,6 @@ async function submitEditDiary(diaryId, date, photoUrl) {
     await loadDiaryList(); 
     viewDiaryByDate(date); 
   } else {
-    console.log("전용 수정 API가 감지되지 않아, 기존 호환 모드(재생성)로 수정을 진행합니다.");
     const delRes = await api({ action:'deleteDiary', diaryId, requesterId: currentUser.id }, true);
     if (!delRes.ok) { loading(false); await uiAlert('호환 모드 삭제 실패: ' + delRes.error); return; }
     
@@ -1123,7 +1125,8 @@ async function deletePlayerAccount(targetId, name){
   if (res.ok) { await uiAlert('삭제되었습니다.', '삭제 완료'); renderCoachSidebar(); } else await uiAlert(res.error, '삭제 오류');
 }
 
-function onPlayerChange(){
+async function onPlayerChange(){
+  await flushPendingSaves(); // ✨ 다른 선수로 넘어가기 전 강제 동기화
   const sel = document.getElementById('playerSelect');
   currentPlayerId = sel.value; currentPlayerName = sel.options[sel.selectedIndex].text;
   currentEntry = null; showEmpty();
@@ -1139,8 +1142,10 @@ function onPlayerChange(){
 
 /* ---------- 전체 대시보드 ---------- */
 async function showDashboard(){
+  await flushPendingSaves(); // ✨ 대시보드 진입 전 강제 동기화 (레이스 컨디션 해결)
+
   hidePanels(); document.getElementById('dashboardWrapper').style.display = 'block';
-  document.getElementById('dashboardCard').innerHTML = '<div style="text-align:center; padding: 40px; color:#64748b;"><i class="fa fa-spinner fa-spin fa-2x" style="margin-bottom:16px;"></i><br><b style="color:var(--black);">전체 주기화 및 포토 일지 데이터를 분석 중입니다...</b><br><br><span style="font-size:12px;">선수 전체의 일지를 개별 스캔하고 있어 <b>2~3초 정도 소요</b>될 수 있습니다.</span></div>';
+  document.getElementById('dashboardCard').innerHTML = '<div style="text-align:center; padding: 40px; color:#64748b;"><i class="fa fa-spinner fa-spin fa-2x" style="margin-bottom:16px;"></i><br><b style="color:var(--black);">전체 주기화 및 포토 일지 데이터를 분석 중입니다...</b></div>';
 
   const res = await api({ action:'getAllData', requesterId: currentUser.id });
   if (!res.ok) { await uiAlert(res.error, '오류'); return; }
@@ -1193,13 +1198,20 @@ async function showDashboard(){
     }).join('');
 
     const pDiaries = allDiariesMap[p.id].sort((a,b) => new Date(b.date) - new Date(a.date));
-    const recentDiaries = pDiaries.filter(d => d.date >= thisMonday);
-    const hasDiary = recentDiaries.length > 0;
-    const latestDiaryDate = pDiaries.length > 0 ? pDiaries[0].date : null;
+    const latestDiary = pDiaries.length > 0 ? pDiaries[0] : null;
 
-    const diaryCell = `<td class="dash-cell" style="text-align:center; padding:8px; border:1px solid #e2e8f0; background:${hasDiary?'#f0fdf4':'white'};" onclick="openDashboardDiary('${p.id}', '${esc(p.name)}', '${latestDiaryDate||''}')">
-      <div style="font-size:11px; color:${hasDiary?'#16a34a':'#94a3b8'}; font-weight:bold;">${hasDiary?`✔ ${recentDiaries.length}건 작성`:'미작성'}</div>
-    </td>`;
+    let diaryCell = '';
+    if (!latestDiary) {
+      // 진짜로 한 번도 안 쓴 사람만 클릭 불가 미작성
+      diaryCell = `<td class="dash-cell" style="text-align:center; color:#cbd5e1; padding:8px; border:1px solid #e2e8f0;" onclick="uiToast('작성된 포토 일지가 없습니다.','info')">미작성</td>`;
+    } else {
+      const recentDiariesThisWeek = pDiaries.filter(d => d.date >= thisMonday);
+      const doneThisWeek = recentDiariesThisWeek.length > 0;
+      // 옛날에라도 썼으면 그 날짜(latestDiary.date)를 보여주고 거기로 연결!
+      diaryCell = `<td class="dash-cell" style="text-align:center; padding:8px; border:1px solid #e2e8f0; background:${doneThisWeek?'#f0fdf4':'white'};" onclick="openDashboardDiary('${p.id}', '${esc(p.name)}', '${latestDiary.date}')">
+        <div style="font-size:10px; color:${doneThisWeek?'#16a34a':'#ef4444'}; font-weight:bold;">${doneThisWeek ? `✔ 이번주 ${recentDiariesThisWeek.length}건` : `⚠ 최근: ${latestDiary.date}`}</div>
+      </td>`;
+    }
 
     return `<tr style="border-bottom:1px solid #eee;"><td style="font-weight:bold; padding:8px; white-space:nowrap; border:1px solid #e2e8f0; border-left:none;">
       ${p.photo?`<img src="${p.photo}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">`:''}${p.name}</td>
@@ -1255,7 +1267,7 @@ function openDashboardDiary(playerId, playerName, targetDate) {
   }, 100);
 }
 
-/* ---------- 📊 심층 분석 (주기화별로 보기 통합) ---------- */
+/* ---------- 📊 심층 분석 ---------- */
 function getQuarterFromDate(dateStr) {
   const m = parseInt(dateStr.split('-')[1]);
   if(m<=3) return 'q1'; if(m<=6) return 'q2'; if(m<=9) return 'q3'; return 'q4';
@@ -1270,6 +1282,7 @@ function setAnalyticsMode(mode) {
 }
 
 async function showAnalytics(){
+  await flushPendingSaves(); // ✨ 동기화
   hidePanels(); document.getElementById('analyticsWrapper').style.display = 'block';
   document.getElementById('analyticsCard').innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">데이터를 불러오는 중...</div>';
   
@@ -1533,8 +1546,55 @@ function renderWeekAnalytics() {
   }, 50);
 }
 
-// 📌 이전에 있던 "주기화별로 보기" 기능 부활!
+/* ---------- PDF Kuatia (PDF Report) ---------- */
+async function generatePDFReport() {
+  if(!reportData) return;
+  loading(true, 'PDF 리포트를 생성하는 중입니다...');
+  try {
+    const { jsPDF } = window.jspdf;
+    
+    const originalScrollY = window.scrollY;
+    window.scrollTo(0, 0);
+    
+    const radarCanvas = await html2canvas(document.getElementById('radarCaptureArea'), { scale: 2, backgroundColor: '#ffffff', scrollY: 0 });
+    const lineCanvas = await html2canvas(document.getElementById('lineCaptureArea'), { scale: 2, backgroundColor: '#ffffff', scrollY: 0 });
+    
+    const container = document.getElementById('pdfReportContainer');
+    let feedbacksHtml = reportData.latestFeedbacks.filter(f=>f.text).map(f => `<div style="margin-bottom:10px;"><b>[${f.week}]</b><br>${esc(f.text)}</div>`).join('');
+    if(!feedbacksHtml) feedbacksHtml = '<div style="color:#94a3b8;">최근 피드백이 없습니다.</div>';
+
+    container.innerHTML = `
+      <div class="pdf-header">
+        <h1>FC SEOUL 선수 종합 리포트</h1>
+        <p>${reportData.typeTitle} / ${reportData.periodName} 기준</p>
+      </div>
+      <div style="font-size:16px; font-weight:bold; margin-bottom:10px;">선수 이름: ${reportData.baseName}</div>
+      <div class="pdf-box" style="margin-bottom:20px; font-size:14px; line-height:1.6;">${reportData.percentileStr}</div>
+      <div class="pdf-row">
+        <div class="pdf-col pdf-box"><h3>세부 항목별 밸런스</h3><img src="${radarCanvas.toDataURL('image/png')}" style="width:100%; max-width:300px; display:block; margin:0 auto;"></div>
+        <div class="pdf-col pdf-box"><h3>기간별 성장 추이</h3><img src="${lineCanvas.toDataURL('image/png')}" stylewidth:100%; max-width:350px; display:block; margin:0 auto;"></div>
+      </div>
+      <div class="pdf-box"><h3>최근 주요 지도자 피드백</h3><div style="font-size:12px; line-height:1.5;">${feedbacksHtml}</div></div>
+      <div style="text-align:right; font-size:10px; color:#94a3b8; margin-top:30px;">출력일: ${dateStr(new Date())}</div>
+    `;
+
+    const reportCanvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff', width: 800, scrollY: 0 });
+    const imgData = reportCanvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (reportCanvas.height * pdfWidth) / reportCanvas.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    
+    window.scrollTo(0, originalScrollY);
+    
+    pdf.save(`FC_SEOUL_리포트_${reportData.baseName}_${dateStr(new Date())}.pdf`);
+    uiToast('PDF 다운로드가 완료되었습니다.');
+  } catch (err) { uiAlert('PDF 생성 중 오류가 발생했습니다: ' + err.message, '오류'); } finally { loading(false); }
+}
+
+/* ---------- 주기화별로 보기 ---------- */
 async function showByType(){
+  await flushPendingSaves(); // ✨ 동기화
   hidePanels(); document.getElementById('byTypeWrapper').style.display = 'block';
   document.getElementById('byTypeCard').innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">불러오는 중...</div>';
   const res = await api({ action:'getAllData', requesterId: currentUser.id });
@@ -1592,52 +1652,6 @@ function openByTypeEntry(playerId, playerName, entryId){
   currentEntry.playerComment = currentEntry.playerComment || '';
   currentEntry.coachFeedback = currentEntry.coachFeedback || '';
   renderJournal();
-}
-
-/* ---------- PDF Kuatia (PDF Report) ---------- */
-async function generatePDFReport() {
-  if(!reportData) return;
-  loading(true, 'PDF 리포트를 생성하는 중입니다...');
-  try {
-    const { jsPDF } = window.jspdf;
-    
-    const originalScrollY = window.scrollY;
-    window.scrollTo(0, 0);
-    
-    const radarCanvas = await html2canvas(document.getElementById('radarCaptureArea'), { scale: 2, backgroundColor: '#ffffff', scrollY: 0 });
-    const lineCanvas = await html2canvas(document.getElementById('lineCaptureArea'), { scale: 2, backgroundColor: '#ffffff', scrollY: 0 });
-    
-    const container = document.getElementById('pdfReportContainer');
-    let feedbacksHtml = reportData.latestFeedbacks.filter(f=>f.text).map(f => `<div style="margin-bottom:10px;"><b>[${f.week}]</b><br>${esc(f.text)}</div>`).join('');
-    if(!feedbacksHtml) feedbacksHtml = '<div style="color:#94a3b8;">최근 피드백이 없습니다.</div>';
-
-    container.innerHTML = `
-      <div class="pdf-header">
-        <h1>FC SEOUL 선수 종합 리포트</h1>
-        <p>${reportData.typeTitle} / ${reportData.periodName} 기준</p>
-      </div>
-      <div style="font-size:16px; font-weight:bold; margin-bottom:10px;">선수 이름: ${reportData.baseName}</div>
-      <div class="pdf-box" style="margin-bottom:20px; font-size:14px; line-height:1.6;">${reportData.percentileStr}</div>
-      <div class="pdf-row">
-        <div class="pdf-col pdf-box"><h3>세부 항목별 밸런스</h3><img src="${radarCanvas.toDataURL('image/png')}" style="width:100%; max-width:300px; display:block; margin:0 auto;"></div>
-        <div class="pdf-col pdf-box"><h3>기간별 성장 추이</h3><img src="${lineCanvas.toDataURL('image/png')}" style="width:100%; max-width:350px; display:block; margin:0 auto;"></div>
-      </div>
-      <div class="pdf-box"><h3>최근 주요 지도자 피드백</h3><div style="font-size:12px; line-height:1.5;">${feedbacksHtml}</div></div>
-      <div style="text-align:right; font-size:10px; color:#94a3b8; margin-top:30px;">출력일: ${dateStr(new Date())}</div>
-    `;
-
-    const reportCanvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff', width: 800, scrollY: 0 });
-    const imgData = reportCanvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (reportCanvas.height * pdfWidth) / reportCanvas.width;
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    
-    window.scrollTo(0, originalScrollY);
-    
-    pdf.save(`FC_SEOUL_리포트_${reportData.baseName}_${dateStr(new Date())}.pdf`);
-    uiToast('PDF 다운로드가 완료되었습니다.');
-  } catch (err) { uiAlert('PDF 생성 중 오류가 발생했습니다: ' + err.message, '오류'); } finally { loading(false); }
 }
 
 /* ---------- Kuatiahaipyre (Journal rendering) ---------- */
@@ -1775,6 +1789,7 @@ function scheduleAutoSave(){
   if (!currentEntry) return;
   clearTimeout(autoSaveTimer);
   autoSaveTimer = setTimeout(async () => {
+    autoSaveTimer = null; // 실행 시 초기화
     const res = await api({ action:'saveEntry', entry: currentEntry, editedBy: currentUser.id }, true);
     if (res.ok) { currentEntry.entryId = res.entryId; uiToast('자동저장되었습니다.'); }
   }, 2000);
