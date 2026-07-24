@@ -26,6 +26,7 @@
 *{ box-sizing:border-box; -webkit-print-color-adjust:exact; }
 body{ margin:0; font-family:'Apple SD Gothic Neo', sans-serif; background:var(--bg); }
 
+/* --- 로그인/회원가입 화면 --- */
 #loginScreen{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
 .login-card{ background:white; width:380px; max-width:100%; border-radius:10px; overflow:hidden; box-shadow:0 15px 50px rgba(0,0,0,.5); }
 .login-head{ background:var(--black); border-top:6px solid var(--red); color:white; padding:22px; text-align:center; }
@@ -46,6 +47,7 @@ body{ margin:0; font-family:'Apple SD Gothic Neo', sans-serif; background:var(--
 .cfg-box{ background:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; padding:8px; margin-bottom:14px; }
 .cfg-box small{ color:#64748b; font-size:10px; }
 
+/* --- 메인 앱 화면 --- */
 #appScreen{ display:none; }
 .topbar{ background:var(--black); color:white; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:4px solid var(--red); position:sticky; top:0; z-index:50; flex-wrap:wrap; gap:6px; }
 .topbar .brand{ font-weight:900; }
@@ -231,6 +233,7 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
 </head>
 <body>
 
+<!-- 단 1개의 로그인 스크린 -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-head">
@@ -322,6 +325,7 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   </div>
 </div>
 
+<!-- 단 1개의 메인 앱 스크린 -->
 <div id="appScreen">
   <div class="topbar">
     <div class="brand">FC SEOUL <span>TRAINING LOG</span></div>
@@ -336,6 +340,7 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   <div class="layout">
     <div class="sidebar" id="sidebar"></div>
     <div class="main" id="mainArea">
+      <!-- 패널 영역: 자바스크립트에 의해 하나씩만 block 처리됨 -->
       <div id="dashboardWrapper" style="display:none;"><div id="dashboardCard" class="card" style="border-top:10px solid var(--red);"></div></div>
       <div id="byTypeWrapper" style="display:none;"><div id="byTypeCard" class="card" style="border-top:10px solid var(--gold);"></div></div>
       <div id="analyticsWrapper" style="display:none;"><div id="analyticsCard" class="card" style="border-top:10px solid var(--black);"></div></div>
@@ -344,10 +349,11 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
         <div id="journalCard"></div>
       </div>
       <div id="diaryViewWrapper" style="display:none;"><div id="diaryViewCard"></div></div>
-      <div class="empty" id="emptyMsg"></div>
+      <div id="emptyMsg" class="empty">왼쪽에서 메뉴를 선택해보세요.</div>
     </div>
   </div>
 
+  <!-- 모달 및 공통 팝업 1세트 -->
   <div id="growthModal">
     <div class="box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -360,7 +366,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   </div>
 </div>
 
-<!-- Custom UI Modal -->
 <div id="uiModalOverlay">
   <div class="ui-modal">
     <div class="ui-modal-header" id="uiModalTitle">알림</div>
@@ -372,7 +377,6 @@ tr.goal-row td:first-child, tr.score-row td:first-child, tr.video-row td:first-c
   </div>
 </div>
 
-<!-- Report PDF Container -->
 <div id="pdfReportContainer"></div>
 
 <script>
@@ -403,10 +407,9 @@ let analyticsMode = 'player';
 let calDate = new Date(); 
 let expandedAccordionDay = null; 
 
-/* ---------- 🌟 핵심: 구글 드라이브 이미지 썸네일 우회 변환 함수 ---------- */
+/* ---------- 🌟 구글 드라이브 썸네일 변환 우회 함수 ---------- */
 function getDriveImgUrl(url) {
   if (!url) return '';
-  // 만약 구글 드라이브 uc?export=view 형식이라면, 안전한 썸네일 API로 우회 변환합니다. (구글 정책 차단 회피)
   if (url.includes('drive.google.com') && url.includes('id=')) {
     let match = url.match(/id=([^&]+)/);
     if (match && match[1]) {
@@ -734,12 +737,17 @@ function showPendingScreen(){
 }
 
 function hidePanels(){
-  ['journalWrapper','dashboardWrapper','byTypeWrapper','analyticsWrapper','diaryViewWrapper','emptyMsg'].forEach(id => {
+  const panels = ['dashboardWrapper','byTypeWrapper','analyticsWrapper','journalWrapper','diaryViewWrapper','emptyMsg'];
+  panels.forEach(id => {
     const el = document.getElementById(id);
     if(el) el.style.display = 'none';
   });
 }
-function showEmpty(){ hidePanels(); document.getElementById('emptyMsg').style.display='block'; }
+
+function showEmpty(){ 
+  hidePanels(); 
+  document.getElementById('emptyMsg').style.display='block'; 
+}
 
 function typeSelectHtml(id = 'typeSelect', onchangeStr = 'onTypeChange()'){
   return `<select id="${id}" onchange="${onchangeStr}">
@@ -777,13 +785,13 @@ async function switchMode(mode){
 function renderCycleBody(){
   if (currentUser.role === 'coach') {
     document.getElementById('sidebarBody').innerHTML = `
-      <h3>일지 유형</h3>${typeSelectHtml()}
+      <h3>일지 유형</h3>${typeSelectHtml('typeSelect', 'onTypeChange()')}
       <hr style="margin: 18px 0 10px; border:0; border-top: 1px dashed #cbd5e1;">
       <h3 style="margin-top:0;">${currentPlayerName} 주기화 목록</h3>
       <div id="archiveList">불러오는 중...</div>`;
   } else {
     document.getElementById('sidebarBody').innerHTML = `
-      <h3>일지 유형</h3>${typeSelectHtml()}
+      <h3>일지 유형</h3>${typeSelectHtml('typeSelect', 'onTypeChange()')}
       <h3>새 주차 작성</h3>
       <label style="font-size:11px; color:#64748b;">주차 시작일 (월요일)</label>
       <input type="date" id="newWeekDate">
@@ -810,6 +818,7 @@ async function onTypeChange(){
 
 async function loadArchive(){
   const el = document.getElementById('archiveList');
+  el.innerHTML = '목록을 불러오는 중...';
   const res = await api({ action:'listEntries', playerId: currentPlayerId, type: currentType });
   if (!res.ok) { el.innerHTML = '목록을 불러오지 못했습니다.'; return; }
   if (!res.entries.length) { el.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">작성된 일지가 없습니다.</div>'; return; }
@@ -872,7 +881,8 @@ function loadEntry(entryId){
     currentEntry.playerComment = currentEntry.playerComment || '';
     currentEntry.coachFeedback = currentEntry.coachFeedback || '';
     currentType = currentEntry.type;
-    if (document.getElementById('typeSelect')) document.getElementById('typeSelect').value = currentType;
+    const typeSel = document.getElementById('typeSelect');
+    if (typeSel) typeSel.value = currentType;
     expandedAccordionDay = null;
     renderJournal();
   });
@@ -975,7 +985,6 @@ function renderCalendar() {
   if(grid) grid.innerHTML = html;
 }
 
-// 🌟 구글 썸네일 변환 우회 함수를 사용하여 사진 엑박(Broken Image) 해결
 function viewDiaryByDate(dateStr) {
   const entries = diaryListCache.filter(x => x.date === dateStr);
   const detail = document.getElementById('calDetail');
@@ -1081,6 +1090,7 @@ async function saveDiary(){
 
 async function loadDiaryList(){
   const el = document.getElementById('diaryList'); if (!el) return;
+  el.innerHTML = '목록을 불러오는 중...';
   const res = await api({ action:'listDiary', playerId: currentPlayerId });
   if (!res.ok) { el.innerHTML = '목록을 불러오지 못했습니다.'; return; }
   
@@ -1094,7 +1104,6 @@ async function loadDiaryList(){
   const recent7 = diaryListCache.slice(0, 7); 
   if (!recent7.length) { el.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">작성된 사진이 없습니다.</div>'; return; }
   
-  // 🌟 사이드바 미리보기에도 썸네일 변환 우회 함수를 적용합니다.
   el.innerHTML = recent7.map(d => `
     <div class="diary-item" onclick="viewDiaryByDate('${d.date}')">
       <img src="${getDriveImgUrl(d.photoUrl)}"><span style="flex:1;">${d.date}</span>
@@ -1232,13 +1241,13 @@ async function onPlayerChange(){
   if (!currentPlayerId) { area.innerHTML = ''; return; }
   
   area.innerHTML = `<div class="mode-toggle" style="margin-top:14px;">
-    <button id="modeCycle" onclick="switchMode('cycle')">📋 주기화 목록</button>
+    <button id="modeCycle" onclick="switchMode('cycle')" class="active">📋 주기화 목록</button>
     <button id="modeDiary" onclick="switchMode('diary')">📷 포토 일지</button>
   </div><div id="sidebarBody"></div>`;
-  switchMode('cycle');
+  switchMode('cycle'); // 자동으로 선수 목록을 사이드바에 뿌림
 }
 
-/* ---------- 전체 대시보드 ---------- */
+/* ---------- 🚀 전체 대시보드 (다이렉트 연결 로직 최적화) ---------- */
 async function showDashboard(){
   await flushPendingSaves(); 
 
@@ -1293,6 +1302,7 @@ async function showDashboard(){
       const done = latest.weekStartDate >= thisMonday;
       const pa = avg(latest.playerScores), ca = avg(latest.coachScores);
       pSum+=pa; pCnt++; cSum+=ca; cCnt++;
+      // 🔥 클릭 시 다이렉트 링크 함수 호출
       return `<td class="dash-cell" style="text-align:center; padding:8px; border:1px solid #e2e8f0; background:${done?'#f0fdf4':'white'};" onclick="openDashboardEntry('${p.id}', '${esc(p.name)}', '${t}', '${latest.entryId}')">
         <div style="font-size:10px; color:${done?'#16a34a':'#ef4444'}; font-weight:bold;">${done?'✔ 이번주 작성':'⚠ '+(latest.weekLabel||latest.weekStartDate)}</div>
         <div style="font-size:10.5px;">선수 ${pa} · 지도자 ${ca}</div></td>`;
@@ -1307,6 +1317,7 @@ async function showDashboard(){
     } else {
       const recentDiariesThisWeek = pDiaries.filter(d => d.date >= thisMonday);
       const doneThisWeek = recentDiariesThisWeek.length > 0;
+      // 🔥 클릭 시 포토일지 다이렉트 링크 호출
       diaryCell = `<td class="dash-cell" style="text-align:center; padding:8px; border:1px solid #e2e8f0; background:${doneThisWeek?'#f0fdf4':'white'};" onclick="openDashboardDiary('${p.id}', '${esc(p.name)}', '${latestDiary.date}')">
         <div style="font-size:10px; color:${doneThisWeek?'#16a34a':'#ef4444'}; font-weight:bold;">${doneThisWeek ? `✔ 이번주 ${recentDiariesThisWeek.length}건` : `⚠ 최근: ${latestDiary.date}`}</div>
       </td>`;
@@ -1338,35 +1349,69 @@ async function showDashboard(){
     byTypeCache = res; 
 }
 
-function openDashboardEntry(playerId, playerName, type, entryId) {
+/* 🎯 다이렉트 링크 함수들 (완벽하게 한 번에 팝업 열기) */
+async function openDashboardEntry(playerId, playerName, type, entryId) {
   if(!entryId) return;
+  
+  // 1. 사이드바 선수 세팅
+  currentPlayerId = playerId;
+  currentPlayerName = playerName;
+  currentType = type;
   document.getElementById('playerSelect').value = playerId;
-  onPlayerChange(); 
+  
+  // 2. 사이드바 UI 강제 주입
+  document.getElementById('playerDetailArea').innerHTML = `
+    <div class="mode-toggle" style="margin-top:14px;">
+      <button id="modeCycle" class="active" onclick="switchMode('cycle')">📋 주기화 목록</button>
+      <button id="modeDiary" onclick="switchMode('diary')">📷 포토 일지</button>
+    </div>
+    <div id="sidebarBody">
+      <h3>일지 유형</h3>${typeSelectHtml('typeSelect', 'onTypeChange()')}
+      <hr style="margin: 18px 0 10px; border:0; border-top: 1px dashed #cbd5e1;">
+      <h3 style="margin-top:0;">${playerName} 주기화 목록</h3>
+      <div id="archiveList">목록을 불러오는 중...</div>
+    </div>`;
   document.getElementById('typeSelect').value = type;
-  onTypeChange();
-  setTimeout(() => loadEntry(entryId), 200);
+  sidebarMode = 'cycle';
+  
+  // 3. 백그라운드로 리스트 최신화
+  loadArchive();
+  
+  // 4. 즉시 해당 일지 로딩 후 팝업
+  loadEntry(entryId);
 }
 
-function openDashboardDiary(playerId, playerName, targetDate) {
-  if(!targetDate) {
-    uiToast('작성된 포토일지가 없습니다.', 'info');
-    return;
-  }
+async function openDashboardDiary(playerId, playerName, targetDate) {
+  if(!targetDate) return uiToast('작성된 포토일지가 없습니다.', 'info');
+  
+  // 1. 사이드바 선수 세팅
+  currentPlayerId = playerId;
+  currentPlayerName = playerName;
   document.getElementById('playerSelect').value = playerId;
-  onPlayerChange();
+  
+  // 2. 사이드바 UI 다이어리로 강제 주입
+  document.getElementById('playerDetailArea').innerHTML = `
+    <div class="mode-toggle" style="margin-top:14px;">
+      <button id="modeCycle" onclick="switchMode('cycle')">📋 주기화 목록</button>
+      <button id="modeDiary" class="active" onclick="switchMode('diary')">📷 포토 일지</button>
+    </div>
+    <div id="sidebarBody"></div>`;
+  sidebarMode = 'diary';
+  
+  // 3. 다이어리 구조 렌더링
+  renderCoachDiaryBody();
+  
+  // 4. API 로딩 대기 후 타겟 사진 열기
   setTimeout(() => {
-    switchMode('diary');
-    setTimeout(() => {
-      const d = new Date(targetDate);
-      calDate.setFullYear(d.getFullYear());
-      calDate.setMonth(d.getMonth());
-      renderCalendar();
-      viewDiaryByDate(targetDate);
-    }, 400); 
-  }, 100);
+    const d = new Date(targetDate);
+    calDate.setFullYear(d.getFullYear());
+    calDate.setMonth(d.getMonth());
+    renderCalendar();
+    viewDiaryByDate(targetDate);
+  }, 500); 
 }
 
-/* ---------- 📊 심층 분석 및 주기화별로 보기 ---------- */
+/* ---------- 📊 심층 분석 ---------- */
 function getQuarterFromDate(dateStr) {
   const m = parseInt(dateStr.split('-')[1]);
   if(m<=3) return 'q1'; if(m<=6) return 'q2'; if(m<=9) return 'q3'; return 'q4';
@@ -1671,7 +1716,7 @@ async function generatePDFReport() {
       <div class="pdf-box" style="margin-bottom:20px; font-size:14px; line-height:1.6;">${reportData.percentileStr}</div>
       <div class="pdf-row">
         <div class="pdf-col pdf-box"><h3>세부 항목별 밸런스</h3><img src="${radarCanvas.toDataURL('image/png')}" style="width:100%; max-width:300px; display:block; margin:0 auto;"></div>
-        <div class="pdf-col pdf-box"><h3>기간별 성장 추이</h3><img src="${lineCanvas.toDataURL('image/png')}" style="width:100%; max-width:350px; display:block; margin:0 auto;"></div>
+        <div class="pdf-col pdf-box"><h3>기간별 성장 추이</h3><img src="${lineCanvas.toDataURL('image/png')}" stylewidth:100%; max-width:350px; display:block; margin:0 auto;"></div>
       </div>
       <div class="pdf-box"><h3>최근 주요 지도자 피드백</h3><div style="font-size:12px; line-height:1.5;">${feedbacksHtml}</div></div>
       <div style="text-align:right; font-size:10px; color:#94a3b8; margin-top:30px;">출력일: ${dateStr(new Date())}</div>
@@ -1691,7 +1736,7 @@ async function generatePDFReport() {
   } catch (err) { uiAlert('PDF 생성 중 오류가 발생했습니다: ' + err.message, '오류'); } finally { loading(false); }
 }
 
-/* ---------- 주기화별로 보기 ---------- */
+/* ---------- 🔄 주기화별로 보기 (오류 수정 완료) ---------- */
 async function showByType(){
   await flushPendingSaves(); 
   hidePanels(); document.getElementById('byTypeWrapper').style.display = 'block';
@@ -1744,9 +1789,36 @@ function renderByTypeResults(type, week){
         ${missing.length ? missing.map(p=>`<div class="list-item" style="opacity:.55;"><span>${p.photo?`<img src="${p.photo}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px;">`:''}${p.name}</span></div>`).join('') : '<div style="font-size:11.5px; color:#94a3b8;">없음</div>'}</div>
     </div>`;
 }
+
+// 🎯 주기화 보기에서 클릭 시 동작 (사이드바 동기화 로직 보완)
 function openByTypeEntry(playerId, playerName, entryId){
   const entry = byTypeCache.entries.find(e => e.entryId === entryId); if (!entry) return;
-  currentPlayerId = playerId; currentPlayerName = playerName; currentType = entry.type;
+  
+  // 글로벌 변수 세팅
+  currentPlayerId = playerId; 
+  currentPlayerName = playerName; 
+  currentType = entry.type;
+  
+  // 사이드바 UI 강제 최신화 (지도자 화면용)
+  document.getElementById('playerSelect').value = playerId;
+  document.getElementById('playerDetailArea').innerHTML = `
+    <div class="mode-toggle" style="margin-top:14px;">
+      <button id="modeCycle" class="active" onclick="switchMode('cycle')">📋 주기화 목록</button>
+      <button id="modeDiary" onclick="switchMode('diary')">📷 포토 일지</button>
+    </div>
+    <div id="sidebarBody">
+      <h3>일지 유형</h3>${typeSelectHtml('typeSelect', 'onTypeChange()')}
+      <hr style="margin: 18px 0 10px; border:0; border-top: 1px dashed #cbd5e1;">
+      <h3 style="margin-top:0;">${playerName} 주기화 목록</h3>
+      <div id="archiveList">목록을 불러오는 중...</div>
+    </div>`;
+  document.getElementById('typeSelect').value = currentType;
+  sidebarMode = 'cycle';
+  
+  // 백그라운드 리스트 갱신
+  loadArchive();
+
+  // 실제 데이터 렌더링
   currentEntry = JSON.parse(JSON.stringify(entry));
   currentEntry.playerComment = currentEntry.playerComment || '';
   currentEntry.coachFeedback = currentEntry.coachFeedback || '';
@@ -1823,6 +1895,147 @@ async function exportExcel(){
   XLSX.writeFile(wb, `FC_SEOUL_전체데이터_백업_${dateStr(new Date())}.xlsx`);
   loading(false);
   uiToast('엑셀 파일(전체 통합본)이 다운로드되었습니다.');
+}
+
+/* ---------- Kuatiahaipyre (Journal rendering) ---------- */
+function renderJournal(){
+  hidePanels(); document.getElementById('journalWrapper').style.display = 'block';
+  const isPlayer = currentUser.role === 'player', isCoach = currentUser.role === 'coach';
+  const cats = JOURNAL_TYPES[currentEntry.type].categories;
+
+  document.getElementById('journalActionsRow').innerHTML = `
+    ${isCoach ? `<button style="background:#0284c7" onclick="exportPNG()"><i class="fa fa-image"></i> PNG 저장</button>
+    <button style="background:var(--black)" onclick="window.print()"><i class="fa fa-print"></i> PDF 저장</button>` : ''}
+    <button style="background:#16a34a" onclick="saveEntry()"><i class="fa fa-save"></i> 수동 저장</button>`;
+
+  const photo = isPlayer ? (currentUser.photo||'') : ((playersInfo[currentPlayerId]||{}).photo||'');
+  let html = `<div class="j-title">${photo?`<img src="${photo}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;border:2px solid var(--gold);">`:''}${JOURNAL_TYPES[currentEntry.type].title} — ${currentEntry.playerName||''}</div>`;
+  html += `<div class="j-meta">${currentEntry.weekLabel||''} · 시작일: ${currentEntry.weekStartDate}</div>`;
+  
+  html += `<div class="table-responsive"><table class="j-table"><thead><tr><th>선수,지도자 (${currentEntry.weekLabel||''})</th>${cats.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+
+  DAYS.forEach(d => {
+    const isExpanded = expandedAccordionDay === d ? 'acc-expanded' : '';
+    html += `<tr class="goal-row ${isExpanded}"><td data-label="구분" onclick="toggleMobileAccordion(this, '${d}')">개인 목적 (${d}) <i class="fa fa-chevron-down acc-icon"></i></td>`;
+    cats.forEach((c, ci) => {
+      const val = (currentEntry.goals[d]||[])[ci] || '';
+      html += `<td class="goal-cell" data-label="${c}"><textarea data-day="${d}" data-ci="${ci}" onkeyup="updateGoalLocal(this)" onblur="scheduleAutoSave()" ${isPlayer?'':'disabled'} placeholder="${c} 관련 목표 작성">${esc(val)}</textarea></td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `<tr class="score-row"><td data-label="구분">선수 자가평가<div class="eval-helper">[시도 목적 기준]<br>10번 3점, 15번 3.5점<br>20번 4점, 25번 4.5점<br>30 이상 5점<br><br><span style="color:#ef4444;">*같은 점수 2번 누르면 0.5점</span></div></td>${cats.map((c,ci)=>`<td data-label="${c}">${tapHtml('player', ci, currentEntry.playerScores[ci]||0, !isPlayer)}</td>`).join('')}</tr>`;
+  html += `<tr class="score-row"><td data-label="구분">지도자 평가<div class="eval-helper"><span style="color:#ef4444;">*같은 점수 2번 누르면 0.5점</span></div></td>${cats.map((c,ci)=>`<td data-label="${c}">${tapHtml('coach', ci, currentEntry.coachScores[ci]||0, !isCoach)}</td>`).join('')}</tr>`;
+
+  html += `<tr class="video-row"><td data-label="구분">영상 업로드</td>`;
+  cats.forEach((c, ci) => {
+    const v = currentEntry.videos[ci] || {url:''};
+    html += `<td data-label="${c}"><div class="video-cell">
+      <input type="text" placeholder="링크 붙여넣기" value="${esc(v.url||'')}" data-ci="${ci}" onkeyup="updateVideoLocal(this)" onblur="scheduleAutoSave()">
+      <div style="display:flex; gap:4px; align-items:center;">
+        <button onclick="document.getElementById('vf${ci}').click()"><i class="fa fa-upload"></i> 파일 업로드</button>
+        <input type="file" id="vf${ci}" accept="video/mp4,video/quicktime" style="display:none" data-ci="${ci}" onchange="uploadVideo(this)">
+      </div>
+      ${v.url ? `<a href="${v.url}" target="_blank">▶ 영상보기</a>` : ''}
+    </div></td>`;
+  });
+  html += `</tr></tbody></table></div>`;
+
+  html += `<div class="legend-row">${cats.map((c,i)=>`<div><span class="dot" style="background:${PALETTE[i]}"></span>${c}</div>`).join('')}</div>`;
+  html += `<div class="charts-row"><div class="chart-box"><h4>선수 자가평가 비율</h4><canvas id="playerPie"></canvas></div><div class="chart-box"><h4>지도자 평가 비율</h4><canvas id="coachPie"></canvas></div></div>`;
+
+  html += `<div class="note-box" style="background:#fff8f5; border-color:var(--red);">
+    <div style="font-size:12.5px; font-weight:900; color:var(--red); margin-bottom:6px;">✏️ 선수 의견 / 생각</div>
+    <textarea rows="3" onkeyup="updatePlayerCommentLocal(this)" onblur="scheduleAutoSave()" ${isPlayer?'':'disabled'} placeholder="이번 주 느낀 점, 다음 목표 등을 적어보세요.">${esc(currentEntry.playerComment)}</textarea></div>`;
+  html += `<div class="note-box" style="background:#f8fafc; border-color:var(--gold);">
+    <div style="font-size:12.5px; font-weight:900; margin-bottom:6px;">🗣 지도자 피드백</div>
+    <textarea rows="3" onkeyup="updateCoachFeedbackLocal(this)" onblur="scheduleAutoSave()" ${isCoach?'':'disabled'} placeholder="피드백과 다음 주 보완점을 적어주세요.">${esc(currentEntry.coachFeedback)}</textarea></div>`;
+
+  document.getElementById('journalCard').innerHTML = html;
+  drawPies(cats);
+}
+
+function tapHtml(row, ci, value, disabled){
+  let html = `<div class="tap-row">`;
+  for (let i=1;i<=5;i++) {
+    const on = Math.floor(value)===i && value>0;
+    const half = on && value%1!==0;
+    html += `<button type="button" class="tap-btn ${on?'active':''} ${half?'half':''}" ${disabled?'disabled':''} onclick="tapScore('${row}',${ci},${i})">${i}</button>`;
+  }
+  return html + `<span class="tap-val">${value||0}</span></div>`;
+}
+
+function tapScore(row, ci, i){
+  if ((row==='player') !== (currentUser.role==='player')) return;
+  const arr = row==='player' ? currentEntry.playerScores : currentEntry.coachScores;
+  const cur = arr[ci]||0;
+  arr[ci] = (Math.floor(cur)===i && cur>0) ? (cur%1!==0 ? 0 : i+0.5) : i;
+  renderJournal(); 
+  scheduleAutoSave(); 
+}
+
+function updateGoalLocal(el){ currentEntry.goals[el.dataset.day][parseInt(el.dataset.ci)] = el.value; }
+function updateVideoLocal(el){ currentEntry.videos[parseInt(el.dataset.ci)] = { url: el.value }; }
+function updatePlayerCommentLocal(el){ currentEntry.playerComment = el.value; }
+function updateCoachFeedbackLocal(el){ currentEntry.coachFeedback = el.value; }
+
+function toggleMobileAccordion(el, day) {
+  if (window.innerWidth > 820) return; 
+  const tr = el.closest('tr');
+  if (tr.classList.contains('acc-expanded')) {
+    tr.classList.remove('acc-expanded');
+    expandedAccordionDay = null; 
+  } else {
+    document.querySelectorAll('.goal-row').forEach(row => row.classList.remove('acc-expanded'));
+    tr.classList.add('acc-expanded');
+    expandedAccordionDay = day; 
+  }
+}
+
+async function uploadVideo(el){
+  const file = el.files[0]; if (!file) return;
+  if (file.size > 25*1024*1024) await uiAlert('25MB 초과 파일은 업로드가 원활하지 않을 수 있어요.', '주의');
+  const ci = parseInt(el.dataset.ci);
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    loading(true, '대용량 영상/파일을 업로드하는 중입니다.<br>창을 닫지 마세요...');
+    const res = await api({ action:'uploadFile', base64: ev.target.result, filename: file.name, mimeType: file.type }, true);
+    loading(false);
+    if (res.ok) { currentEntry.videos[ci] = { url: res.viewUrl }; renderJournal(); uiToast('업로드 완료!'); }
+    else await uiAlert('업로드 실패: ' + res.error, '오류');
+  };
+  reader.readAsDataURL(file);
+}
+
+function drawPies(cats){
+  const pSum = currentEntry.playerScores.reduce((a,b)=>a+b,0) || 1;
+  const cSum = currentEntry.coachScores.reduce((a,b)=>a+b,0) || 1;
+  const pData = currentEntry.playerScores.map(v=> Math.round(v/pSum*1000)/10);
+  const cData = currentEntry.coachScores.map(v=> Math.round(v/cSum*1000)/10);
+  if (playerChart) playerChart.destroy();
+  if (coachChart) coachChart.destroy();
+  const opts = { responsive:true, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+'%'}} } };
+  playerChart = new Chart(document.getElementById('playerPie'), { type:'pie', data:{ labels:cats, datasets:[{ data:pData, backgroundColor:PALETTE }] }, options:opts });
+  coachChart = new Chart(document.getElementById('coachPie'), { type:'pie', data:{ labels:cats, datasets:[{ data:cData, backgroundColor:PALETTE }] }, options:opts });
+}
+
+async function saveEntry(){
+  if (!currentEntry) return;
+  loading(true, '일지를 저장 중입니다...');
+  const res = await api({ action:'saveEntry', entry: currentEntry, editedBy: currentUser.id }, true);
+  loading(false);
+  if (res.ok) { currentEntry.entryId = res.entryId; uiToast('저장되었습니다.'); loadArchive(); }
+  else await uiAlert('저장 실패: ' + res.error, '오류');
+}
+
+function scheduleAutoSave(){
+  if (!currentEntry) return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(async () => {
+    autoSaveTimer = null; 
+    const res = await api({ action:'saveEntry', entry: currentEntry, editedBy: currentUser.id }, true);
+    if (res.ok) { currentEntry.entryId = res.entryId; uiToast('자동저장되었습니다.'); }
+  }, 2000);
 }
 </script>
 </body>
